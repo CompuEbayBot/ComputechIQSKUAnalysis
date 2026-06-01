@@ -3,184 +3,213 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Inventory Comment Pattern Checker v5 - Verbose Analysis</title>
+  <title>CTS SKU Description Checker v5</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%232563eb'/%3E%3Cstop offset='1' stop-color='%230f766e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='21' cy='32' r='12' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M9 32h24M21 20c5 6 5 18 0 24M21 20c-5 6-5 18 0 24M12 25c6 3 12 3 18 0M12 39c6-3 12-3 18 0' stroke='white' stroke-width='1.8' fill='none'/%3E%3Ctext x='36' y='39' font-family='Arial,sans-serif' font-size='15' font-weight='800' fill='white'%3ECTS%3C/text%3E%3C/svg%3E" />
   <style>
     :root {
-      --bg: #f6f8fb; --card: #ffffff; --text: #1f2937; --muted: #6b7280;
-      --accent: #2563eb; --accent-soft: #dbeafe; --border: #dbe3ef;
-      --good: #0f766e; --warn: #b45309; --bad: #b91c1c; --info: #1d4ed8;
-      --ink: #0f172a;
+      --bg: #f6f8fb;
+      --card: #ffffff;
+      --text: #172033;
+      --muted: #607089;
+      --border: #d8e2ef;
+      --border-strong: #c4d2e4;
+      --accent: #2563eb;
+      --accent-dark: #1d4ed8;
+      --good-bg: #dff7ed;
+      --good: #08704f;
+      --warn-bg: #fff0c2;
+      --warn: #9a5b00;
+      --bad-bg: #fde2e2;
+      --bad: #a61b1b;
+      --info-bg: #e9f1ff;
+      --info: #1d4ed8;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+      --radius: 16px;
     }
     * { box-sizing: border-box; }
-    body { margin: 0; font-family: Arial, Helvetica, sans-serif; background: var(--bg); color: var(--text); }
-    .wrap { max-width: 1440px; margin: 0 auto; padding: 24px; }
-    h1, h2, h3 { margin-top: 0; }
-    h1 { margin-bottom: 6px; }
-    .lede { color: var(--muted); margin-top: 0; line-height: 1.55; }
-    .card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 18px; box-shadow: 0 3px 10px rgba(0,0,0,0.04); margin-bottom: 18px; }
-    .grid { display: grid; gap: 16px; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
-    .two-col { display: grid; gap: 16px; grid-template-columns: minmax(320px, 1fr) minmax(320px, 1fr); }
-    @media (max-width: 900px) { .two-col { grid-template-columns: 1fr; } }
-    label { display: block; font-weight: 700; margin-bottom: 8px; }
-    input[type="file"], textarea, button, select { width: 100%; font: inherit; }
-    textarea, select { padding: 12px; border-radius: 10px; border: 1px solid var(--border); background: #fff; }
-    textarea { min-height: 120px; resize: vertical; }
-    button { border: 0; background: var(--accent); color: white; padding: 12px 14px; border-radius: 10px; cursor: pointer; font-weight: 700; }
+    body {
+      margin: 0;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.45;
+    }
+    .wrap { max-width: 1280px; margin: 0 auto; padding: 22px; }
+    .hero {
+      display: flex;
+      gap: 14px;
+      align-items: center;
+      margin-bottom: 18px;
+    }
+    .version { display: inline-block; margin-top: 6px; color: var(--muted); font-size: 12px; font-weight: 700; }
+    .logo {
+      width: 48px;
+      height: 48px;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #2563eb, #0f766e);
+      color: white;
+      display: grid;
+      place-items: center;
+      font-weight: 900;
+      letter-spacing: -0.04em;
+      box-shadow: var(--shadow);
+      flex: 0 0 auto;
+    }
+    h1 { font-size: 24px; line-height: 1.2; margin: 0 0 4px; }
+    p { margin: 0; color: var(--muted); }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 18px;
+      margin-bottom: 16px;
+    }
+    .controls {
+      display: grid;
+      grid-template-columns: minmax(280px, 1.2fr) minmax(240px, 0.8fr) minmax(240px, 0.8fr);
+      gap: 14px;
+      align-items: end;
+    }
+    label { display: block; font-weight: 800; font-size: 13px; margin-bottom: 8px; color: #0f172a; }
+    input[type="file"], textarea, select, button { width: 100%; font: inherit; }
+    input[type="file"], textarea, select {
+      border: 1px solid var(--border-strong);
+      border-radius: 12px;
+      background: white;
+      padding: 11px 12px;
+      min-height: 44px;
+    }
+    textarea { min-height: 94px; resize: vertical; }
+    .help { color: var(--muted); font-size: 12px; margin-top: 7px; }
+    .btn-row { display: flex; gap: 10px; flex-wrap: wrap; }
+    button {
+      border: 0;
+      border-radius: 12px;
+      min-height: 44px;
+      padding: 11px 14px;
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      cursor: pointer;
+    }
+    button:hover { background: var(--accent-dark); }
     button.secondary { background: #475569; }
-    button:disabled { opacity: 0.7; cursor: not-allowed; }
-    .btn-row { display: flex; gap: 12px; flex-wrap: wrap; }
-    .btn-row button { flex: 1 1 200px; }
-    .status { font-size: 14px; color: var(--muted); margin-top: 10px; white-space: pre-wrap; }
-    .progress-wrap { width: 100%; background: #e8eef8; height: 16px; border-radius: 999px; overflow: hidden; margin-top: 10px; }
-    .progress { height: 100%; width: 0%; background: linear-gradient(90deg, #2563eb, #60a5fa); transition: width 0.2s ease; }
-    .pill { display: inline-block; padding: 6px 10px; border-radius: 999px; font-size: 12px; font-weight: 700; margin-right: 6px; margin-bottom: 6px; }
-    .good { background: #d1fae5; color: var(--good); }
-    .warn { background: #fef3c7; color: var(--warn); }
-    .bad { background: #fee2e2; color: var(--bad); }
-    .info { background: #dbeafe; color: var(--info); }
-    .muted-pill { background: #e5e7eb; color: #374151; }
-    .stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); gap: 12px; margin-top: 12px; }
-    .stat { border: 1px solid var(--border); border-radius: 12px; padding: 12px; background: #fbfdff; }
-    .stat .label { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .04em; }
-    .stat .num { font-size: 26px; font-weight: 800; margin-top: 4px; }
-    .stat .note { color: var(--muted); font-size: 12px; margin-top: 5px; line-height: 1.35; }
-    table { width: 100%; border-collapse: collapse; font-size: 14px; margin-top: 12px; }
-    th, td { text-align: left; border-bottom: 1px solid var(--border); padding: 10px 8px; vertical-align: top; }
-    th { position: sticky; top: 0; background: #f8fbff; z-index: 1; }
-    .table-wrap { max-height: 650px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; }
-    .mini-table-wrap { max-height: 360px; overflow: auto; border: 1px solid var(--border); border-radius: 12px; }
-    code { background: #eef2ff; padding: 2px 6px; border-radius: 6px; }
-    .small { font-size: 12px; color: var(--muted); line-height: 1.45; }
-    .debug-console { min-height: 150px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; background: #0f172a; color: #e2e8f0; border: 1px solid #334155; }
-    .explain li { margin-bottom: 8px; line-height: 1.4; }
-    .analysis-text { line-height: 1.6; color: #374151; }
-    .row-details { font-size: 13px; line-height: 1.45; }
-    .row-details b { color: var(--ink); }
-    .checks { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-    .check-ok { background: #dcfce7; color: #166534; }
-    .check-missing { background: #fef3c7; color: #92400e; }
-    .check-conflict { background: #fee2e2; color: #991b1b; }
-    .check-skip { background: #e5e7eb; color: #374151; }
-    .bar { height: 12px; background: #eef2ff; border-radius: 999px; overflow: hidden; min-width: 110px; }
-    .bar > span { display: block; height: 100%; background: #2563eb; }
-    details { margin-top: 8px; }
-    summary { cursor: pointer; color: var(--accent); font-weight: 700; }
-    .nowrap { white-space: nowrap; }
+    button.secondary:hover { background: #334155; }
+    button:disabled { opacity: 0.55; cursor: not-allowed; }
+    .status { color: var(--muted); font-size: 13px; margin-top: 10px; min-height: 20px; }
+    .progress-wrap { height: 12px; background: #e5edf7; border-radius: 999px; overflow: hidden; margin-top: 10px; }
+    .progress { height: 100%; width: 0%; background: linear-gradient(90deg, #2563eb, #38bdf8); transition: width 0.18s ease; }
+    .summary { display: grid; grid-template-columns: repeat(5, minmax(130px, 1fr)); gap: 10px; }
+    .stat { border: 1px solid var(--border); border-radius: 14px; padding: 12px; background: #fbfdff; }
+    .stat-label { color: var(--muted); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .03em; }
+    .stat-value { font-size: 26px; font-weight: 900; margin-top: 2px; }
+    .table-wrap { overflow: auto; max-height: 72vh; border: 1px solid var(--border); border-radius: var(--radius); }
+    table { border-collapse: separate; border-spacing: 0; width: 100%; min-width: 1060px; font-size: 13px; }
+    th, td { text-align: left; vertical-align: top; padding: 13px 12px; border-bottom: 1px solid var(--border); }
+    th {
+      position: sticky;
+      top: 0;
+      z-index: 1;
+      background: #f8fbff;
+      color: #0f172a;
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .04em;
+    }
+    tr:last-child td { border-bottom: 0; }
+    tbody tr:hover { background: #fafcff; }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      border-radius: 999px;
+      padding: 5px 10px;
+      font-size: 12px;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+    .pill.good { background: var(--good-bg); color: var(--good); }
+    .pill.warn { background: var(--warn-bg); color: var(--warn); }
+    .pill.bad { background: var(--bad-bg); color: var(--bad); }
+    .pill.info { background: var(--info-bg); color: var(--info); }
+    .issue { max-width: 330px; }
+    .facts { min-width: 265px; }
+    .fact-line { margin-bottom: 6px; }
+    .ok { color: var(--good); font-weight: 800; }
+    .badtext { color: var(--bad); font-weight: 800; }
+    .warntext { color: var(--warn); font-weight: 800; }
+    .muted { color: var(--muted); }
+    .source-text { min-width: 260px; max-width: 420px; }
+    @media (max-width: 900px) {
+      .wrap { padding: 14px; }
+      .controls, .summary { grid-template-columns: 1fr; }
+      h1 { font-size: 21px; }
+    }
   </style>
 </head>
 <body>
   <div class="wrap">
-    <h1>Inventory Comment Pattern Checker v5</h1>
-    <p class="lede">Verbose analysis edition. This page reviews an inventory export, explains exactly what facts were expected from each row, compares those facts against the inventory comment, and separates true contradictions from missing-but-reviewable details.</p>
-
-    <div class="card explain">
-      <h3>What this verbose version adds</h3>
-      <ul>
-        <li><b>Broader laptop/tablet analysis:</b> extracts brand, model family, CPU, CPU speed, RAM, storage, screen size, color, model codes, and network hints from <code>description</code>, <code>itemnumber</code>, <code>mfgr</code>, and related columns.</li>
-        <li><b>More transparent scoring:</b> every row gets a score based on comparable facts, plus a row narrative explaining what was confirmed, missing, or contradictory.</li>
-        <li><b>Verbose dashboards:</b> includes data profile, severity mix, reason breakdown, fact coverage, comment-quality signals, warehouse/condition breakdowns, and top repeated item numbers.</li>
-        <li><b>Less noisy mismatches:</b> optional attributes such as color and screen size are treated as useful context, but they do not fail a row unless there is a clear contradiction.</li>
-        <li><b>Downloadable detail:</b> exported review CSV now includes description, serial, warehouse, location, parsed facts, detailed checks, and row narrative.</li>
-      </ul>
-    </div>
-
-    <div class="grid">
-      <div class="card">
-        <label for="csvFile">Step 1: Upload CSV file</label>
-        <input id="csvFile" type="file" accept=".csv,text/csv,.txt,.tsv" />
-        <div class="small">Required headers: itemid, itemnumber, inventorycomments. Strongly recommended: description, mfgr, serialnumber, conditioncode, warehouse, location, status, unitcost.</div>
+    <header class="hero">
+      <div class="logo">CTS</div>
+      <div>
+        <h1>Fuzzy SKU vs Title / Description Checker</h1>
+        <p>CSV only. Compares the coded SKU facts against the title/description and shows only actual inconsistencies by default.</p>
+        <span class="version">v5.1 - model-code matching fixed</span>
       </div>
-      <div class="card">
-        <label for="filterItems">Step 2: Optional focus list</label>
-        <textarea id="filterItems" placeholder="Paste item numbers, serial numbers, or item IDs here, one per line, if you only want to scan certain rows."></textarea>
-        <div class="small">Leave blank to scan every row in the CSV. Matching is case-insensitive and checks item number, item ID, and serial number.</div>
-      </div>
-      <div class="card">
-        <label for="mode">Step 3: Review mode</label>
-        <select id="mode">
-          <option value="strict">Strict: show mismatches + warnings</option>
-          <option value="mismatchOnly" selected>Recommended: show true mismatches only</option>
-          <option value="all">Audit: show every scanned row</option>
-        </select>
-        <div class="small">Recommended mode keeps the table focused. Use Strict or Audit when you want to inspect missing details and scoring logic.</div>
-      </div>
-    </div>
+    </header>
 
-    <div class="card">
-      <div class="btn-row">
-        <button id="analyzeBtn">Analyze File</button>
-        <button id="downloadBtn" class="secondary" disabled>Download displayed rows CSV</button>
+    <section class="card">
+      <div class="controls">
+        <div>
+          <label for="csvFile">Upload CSV</label>
+          <input id="csvFile" type="file" accept=".csv,text/csv,.txt" />
+          <div class="help">Looks for <b>itemnumber</b> and <b>description</b>. Optional: itemid, mfgr, category, inventorycomments, extdescription.</div>
+        </div>
+        <div>
+          <label for="mode">Rows to show</label>
+          <select id="mode">
+            <option value="mismatchOnly" selected>Mismatches only</option>
+            <option value="issues">Mismatches and warnings</option>
+            <option value="all">All rows</option>
+          </select>
+          <div class="help">Default view hides missing optional details and shows contradictions only.</div>
+        </div>
+        <div>
+          <label for="filterItems">Optional item filter</label>
+          <textarea id="filterItems" placeholder="Paste item numbers or item IDs, one per line."></textarea>
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:14px;">
+        <button id="analyzeBtn">Analyze CSV</button>
+        <button id="downloadBtn" class="secondary" disabled>Download displayed rows</button>
       </div>
       <div class="progress-wrap"><div class="progress" id="progressBar"></div></div>
-      <div class="status" id="statusText">Waiting for file…</div>
+      <div class="status" id="statusText">Waiting for CSV...</div>
+    </section>
 
-      <div style="margin-top:14px;">
-        <label for="debugConsole">Debug console</label>
-        <textarea id="debugConsole" class="debug-console" readonly>[ready] Waiting for file...
-</textarea>
-      </div>
-    </div>
+    <section class="card" id="summaryCard" style="display:none;">
+      <div class="summary" id="summaryBox"></div>
+    </section>
 
-    <div class="card" id="summaryCard" style="display:none;">
-      <h2>Executive summary</h2>
-      <div id="summaryPills"></div>
-      <p id="summaryNarrative" class="analysis-text"></p>
-      <div class="stats" id="statsBox"></div>
-    </div>
-
-    <div class="two-col" id="analysisCards" style="display:none;">
-      <div class="card">
-        <h2>Data profile</h2>
-        <div id="dataProfile"></div>
-      </div>
-      <div class="card">
-        <h2>Comment-quality signals</h2>
-        <div id="qualitySignals"></div>
-      </div>
-    </div>
-
-    <div class="two-col" id="breakdownCards" style="display:none;">
-      <div class="card">
-        <h2>Reason breakdown</h2>
-        <div id="reasonBreakdown"></div>
-      </div>
-      <div class="card">
-        <h2>Expected fact coverage</h2>
-        <div id="coverageBreakdown"></div>
-      </div>
-    </div>
-
-    <div class="two-col" id="opsCards" style="display:none;">
-      <div class="card">
-        <h2>Warehouse and condition view</h2>
-        <div id="opsBreakdown"></div>
-      </div>
-      <div class="card">
-        <h2>Repeated item numbers</h2>
-        <div id="repeatBreakdown"></div>
-      </div>
-    </div>
-
-    <div class="card" id="resultsCard" style="display:none;">
-      <h2>Rows to review</h2>
-      <p class="small">The table is intentionally verbose. The detail column includes the expected facts, the result of each check, and a plain-English explanation of why the row did or did not need review.</p>
+    <section class="card" id="resultsCard" style="display:none;">
       <div class="table-wrap">
         <table>
           <thead>
             <tr>
-              <th>Item</th>
-              <th>Operational context</th>
+              <th>Item ID</th>
+              <th>Item Number / SKU</th>
               <th>Severity</th>
-              <th>Score</th>
-              <th>Reasons</th>
-              <th>Verbose detail</th>
-              <th>Comment preview</th>
+              <th>Issue</th>
+              <th>SKU Facts Checked</th>
+              <th>Title / Description</th>
             </tr>
           </thead>
           <tbody id="resultsBody"></tbody>
         </table>
       </div>
-    </div>
+    </section>
   </div>
 
   <script>
@@ -192,107 +221,93 @@
     const progressBar = document.getElementById('progressBar');
     const statusText = document.getElementById('statusText');
     const summaryCard = document.getElementById('summaryCard');
-    const analysisCards = document.getElementById('analysisCards');
-    const breakdownCards = document.getElementById('breakdownCards');
-    const opsCards = document.getElementById('opsCards');
     const resultsCard = document.getElementById('resultsCard');
-    const summaryPills = document.getElementById('summaryPills');
-    const summaryNarrative = document.getElementById('summaryNarrative');
-    const statsBox = document.getElementById('statsBox');
-    const dataProfile = document.getElementById('dataProfile');
-    const qualitySignals = document.getElementById('qualitySignals');
-    const reasonBreakdown = document.getElementById('reasonBreakdown');
-    const coverageBreakdown = document.getElementById('coverageBreakdown');
-    const opsBreakdown = document.getElementById('opsBreakdown');
-    const repeatBreakdown = document.getElementById('repeatBreakdown');
+    const summaryBox = document.getElementById('summaryBox');
     const resultsBody = document.getElementById('resultsBody');
-    const debugConsole = document.getElementById('debugConsole');
 
     let displayedRows = [];
 
-    function debugLog(message, data = null) {
-      const time = new Date().toLocaleTimeString();
-      let line = `[${time}] ${message}`;
-      if (data !== null) {
-        try { line += ' ' + (typeof data === 'string' ? data : JSON.stringify(data)); }
-        catch (e) { line += ' [unserializable debug data]'; }
-      }
-      debugConsole.value += line + '\n';
-      debugConsole.scrollTop = debugConsole.scrollHeight;
-      console.log(message, data ?? '');
-    }
+    // Version 5.1 - CSV only. Known CTS SKU patterns preserved from the prior inventory/master data:
+    // DELL: L5440 => Latitude 5440, P7560 => Precision 7560.
+    // HP: EB850G8 => EliteBook 850 Gen 8, PB445G7 => ProBook 445 Gen 7.
+    // LENOVO: T14SG2 => ThinkPad T14s Gen 2, X1CG10 => X1 Carbon Gen 10.
+    // MICROSOFT: SUR41951 => Surface Laptop 4 1951, SURP61796 => Surface Pro 6 1796.
+    // SKU sections generally mean: MODEL-CPU-SPEED-RAM-STORAGE-COLOR-OPTIONS.
 
     analyzeBtn.addEventListener('click', async () => {
-      debugConsole.value = '[ready] Starting analysis...\n';
       try {
         analyzeBtn.disabled = true;
         downloadBtn.disabled = true;
-        clearOutput();
-        setProgress(0, 'Reading file...');
+        summaryCard.style.display = 'none';
+        resultsCard.style.display = 'none';
+        resultsBody.innerHTML = '';
+        summaryBox.innerHTML = '';
+        displayedRows = [];
+        setProgress(4, 'Reading CSV...');
 
         const file = csvFile.files[0];
         if (!file) throw new Error('Please upload a CSV file first.');
-        const text = await readFileText(file);
+        const text = await readTextSmart(file);
         const rows = parseCSV(text);
-        if (!rows.length) throw new Error('The CSV appears to be empty.');
+        if (rows.length < 2) throw new Error('The CSV appears to be empty.');
 
-        const headers = rows[0].map(v => normalizeHeader(v));
-        const colIndex = mapColumns(headers);
-        const missing = ['itemid','itemnumber','inventorycomments'].filter(k => colIndex[k] === -1);
-        if (missing.length) throw new Error('Missing required header(s): ' + missing.join(', '));
-
-        debugLog('Detected column indexes', colIndex);
-        if (colIndex.description === -1) debugLog('Optional description column was not found. Accuracy will be lower.');
-        if (colIndex.mfgr === -1) debugLog('Optional mfgr column was not found. Brand checks will rely on description/item number only.');
+        const headers = rows[0].map(normalizeHeader);
+        const col = buildColumnMap(headers);
+        if (col.itemnumber < 0) throw new Error('Missing required column: itemnumber.');
+        if (col.description < 0 && col.title < 0 && col.extdescription < 0) {
+          throw new Error('Missing a title/description column. Expected description, title, name, or extdescription.');
+        }
 
         const filterSet = new Set(filterItems.value.split(/\r?\n/).map(v => normalizeText(v)).filter(Boolean));
-        const dataRows = rows.slice(1).filter(r => r.some(cell => String(cell ?? '').trim() !== ''));
+        const dataRows = rows.slice(1).filter(r => r.some(cell => safeCell(cell)));
         const rowsToScan = filterSet.size
-          ? dataRows.filter(r => filterSet.has(normalizeText(safeCell(r[colIndex.itemnumber]))) || filterSet.has(normalizeText(safeCell(r[colIndex.itemid]))) || filterSet.has(normalizeText(safeCell(r[colIndex.serialnumber]))))
+          ? dataRows.filter(r => filterSet.has(normalizeText(getCell(r, col.itemnumber))) || filterSet.has(normalizeText(getCell(r, col.itemid))))
           : dataRows;
+        if (!rowsToScan.length) throw new Error('No rows matched the selected filter.');
 
-        if (!rowsToScan.length) throw new Error(filterSet.size ? 'No rows matched the pasted item numbers, item IDs, or serial numbers.' : 'No rows were selected for scanning.');
-
-        const stats = createStats(rowsToScan.length);
         const allResults = [];
-        const chunkSize = 100;
+        const stats = { scanned: rowsToScan.length, mismatch: 0, warning: 0, pass: 0, displayed: 0 };
+        setProgress(10, `Scanning ${rowsToScan.length.toLocaleString()} row(s)...`);
 
-        setProgress(8, `Headers found. Scanning ${rowsToScan.length.toLocaleString()} row(s)...`);
-        for (let index = 0; index < rowsToScan.length; index += chunkSize) {
-          const chunk = rowsToScan.slice(index, index + chunkSize);
-          for (const row of chunk) {
-            const item = getItem(row, colIndex);
-            const result = analyzeRow(item);
-            allResults.push(result);
-            updateStats(stats, result, item);
+        for (let i = 0; i < rowsToScan.length; i++) {
+          const r = rowsToScan[i];
+          const item = {
+            itemid: getCell(r, col.itemid),
+            sku: getCell(r, col.itemnumber),
+            mfgr: getCell(r, col.mfgr),
+            title: getCell(r, col.title),
+            description: getCell(r, col.description),
+            extdescription: getCell(r, col.extdescription),
+            category: getCell(r, col.category),
+            inventorycomments: getCell(r, col.inventorycomments)
+          };
+          const result = analyzeRow(item);
+          allResults.push(result);
+          if (result.severity === 'Mismatch') stats.mismatch++;
+          else if (result.severity === 'Warning') stats.warning++;
+          else stats.pass++;
+          if (i % 150 === 0) {
+            setProgress(10 + Math.round((i / rowsToScan.length) * 85), `Processed ${i.toLocaleString()} of ${rowsToScan.length.toLocaleString()} row(s)...`);
+            await pause();
           }
-          const processed = Math.min(index + chunkSize, rowsToScan.length);
-          setProgress(Math.round((processed / rowsToScan.length) * 100), `Processed ${processed.toLocaleString()} of ${rowsToScan.length.toLocaleString()} row(s)...`);
-          await pause();
         }
 
         const mode = modeSelect.value;
-        displayedRows = allResults.filter(r => {
+        displayedRows = allResults.filter(row => {
           if (mode === 'all') return true;
-          if (mode === 'strict') return r.severity !== 'Pass';
-          return r.severity === 'Mismatch';
+          if (mode === 'mismatchOnly') return row.severity === 'Mismatch';
+          return row.severity !== 'Pass';
         });
         stats.displayed = displayedRows.length;
 
         renderSummary(stats);
-        renderVerboseAnalysis(stats, allResults);
         renderResults(displayedRows);
         summaryCard.style.display = 'block';
-        analysisCards.style.display = 'grid';
-        breakdownCards.style.display = 'grid';
-        opsCards.style.display = 'grid';
         resultsCard.style.display = 'block';
         downloadBtn.disabled = displayedRows.length === 0;
-        setProgress(100, `Done. Displaying ${stats.displayed.toLocaleString()} row(s). True mismatches: ${stats.mismatch.toLocaleString()}. Warnings: ${stats.warning.toLocaleString()}.`);
-        debugLog('Analysis complete', stats);
-      } catch (error) {
-        debugLog('Analysis error', error && error.message ? error.message : error);
-        setProgress(0, error.message || 'Something went wrong.');
+        setProgress(100, `Done. Showing ${stats.displayed.toLocaleString()} row(s).`);
+      } catch (err) {
+        setProgress(0, err && err.message ? err.message : 'Something went wrong.');
       } finally {
         analyzeBtn.disabled = false;
       }
@@ -300,681 +315,648 @@
 
     downloadBtn.addEventListener('click', () => {
       if (!displayedRows.length) return;
-      const headers = ['itemid','itemnumber','serialnumber','description','mfgr','warehouse','location','conditioncode','status','severity','score','reasons','expectedfacts','checkdetails','rowanalysis','inventorycomments'];
+      const headers = ['itemid', 'itemnumber', 'severity', 'issue', 'sku_facts_checked', 'title_description'];
       const lines = [headers.join(',')];
       for (const row of displayedRows) {
         lines.push([
-          csvEscape(row.itemid), csvEscape(row.itemnumber), csvEscape(row.serialnumber), csvEscape(row.description), csvEscape(row.mfgr),
-          csvEscape(row.warehouse), csvEscape(row.location), csvEscape(row.conditioncode), csvEscape(row.status), csvEscape(row.severity), csvEscape(String(row.score)),
-          csvEscape(row.reasons.join(' | ')), csvEscape(row.expectedFacts.join(' | ')), csvEscape(row.checks.map(c => `${c.name}: ${c.status}${c.note ? ' - ' + c.note : ''}`).join(' | ')),
-          csvEscape(row.narrative), csvEscape(row.inventorycomments)
+          csvEscape(row.itemid),
+          csvEscape(row.sku),
+          csvEscape(row.severity),
+          csvEscape(row.issues.join(' | ')),
+          csvEscape(row.factLines.map(f => `${f.label}: ${f.expected} ${f.mark}`).join(' | ')),
+          csvEscape(row.sourceText)
         ].join(','));
       }
       const blob = new Blob([lines.join('\n')], { type: 'text/csv;charset=utf-8;' });
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
       a.href = url;
-      a.download = 'inventory_comment_review_rows_verbose_v5.csv';
+      a.download = 'sku_description_review.csv';
       a.click();
       URL.revokeObjectURL(url);
     });
 
-    async function readFileText(file) {
-      const buffer = await file.arrayBuffer();
-      const utf8 = new TextDecoder('utf-8', { fatal: false }).decode(buffer);
-      const replacementRate = (utf8.match(/\uFFFD/g) || []).length / Math.max(1, utf8.length);
-      if (replacementRate > 0.001) return new TextDecoder('windows-1252').decode(buffer);
-      return utf8;
-    }
+    function analyzeRow(item) {
+      const skuFacts = parseSkuFacts(item.sku, item.mfgr);
+      const sourceText = buildSourceText(item);
+      const normalizedSource = normalizeText(sourceText);
+      const factLines = [];
+      const issues = [];
+      let conflicts = 0;
+      let warnings = 0;
+      let checks = 0;
+      let ok = 0;
 
-    function clearOutput() {
-      resultsBody.innerHTML = '';
-      summaryPills.innerHTML = '';
-      summaryNarrative.textContent = '';
-      statsBox.innerHTML = '';
-      dataProfile.innerHTML = '';
-      qualitySignals.innerHTML = '';
-      reasonBreakdown.innerHTML = '';
-      coverageBreakdown.innerHTML = '';
-      opsBreakdown.innerHTML = '';
-      repeatBreakdown.innerHTML = '';
-      summaryCard.style.display = 'none';
-      analysisCards.style.display = 'none';
-      breakdownCards.style.display = 'none';
-      opsCards.style.display = 'none';
-      resultsCard.style.display = 'none';
-      displayedRows = [];
-    }
+      function addCheck(label, expected, check) {
+        if (!expected) return;
+        const result = check();
+        if (result.status === 'optional') {
+          factLines.push({ label, expected, status: result.status, mark: '-' });
+          return;
+        }
+        checks++;
+        if (result.status === 'ok') ok++;
+        if (result.status === 'conflict') { conflicts++; issues.push(result.message); }
+        if (result.status === 'missing') { warnings++; issues.push(result.message); }
+        factLines.push({ label, expected, status: result.status, mark: result.status === 'ok' ? '✓' : result.status === 'conflict' ? '✕' : '!' });
+      }
 
-    function mapColumns(headers) {
-      const aliases = {
-        inventoryid: ['inventoryid'], poid: ['poid'], itemid: ['itemid'], itemnumber: ['itemnumber'], mfgr: ['mfgr','manufacturer'],
-        description: ['description'], serialnumber: ['serialnumber','serial'], status: ['status'], receivestatus: ['receivestatus'], warehouse: ['warehouse'],
-        location: ['location'], rep: ['rep'], conditioncode: ['conditioncode','condition'], qty: ['qty','quantity'], unitcost: ['unitcost'],
-        hascomments: ['hascomments'], inventorycomments: ['inventorycomments','comments'], gpu: ['gpu'], category: ['category'], suggestedprice: ['suggestedprice']
-      };
-      const out = {};
-      for (const [name, list] of Object.entries(aliases)) {
-        out[name] = -1;
-        for (const alias of list) {
-          const idx = headers.indexOf(alias);
-          if (idx !== -1) { out[name] = idx; break; }
+      if (!safeCell(item.sku)) {
+        conflicts++;
+        issues.push('Missing SKU / itemnumber.');
+      }
+      if (!safeCell(sourceText)) {
+        conflicts++;
+        issues.push('Missing title/description text to compare against SKU.');
+      }
+
+      addCheck('Product/model', skuFacts.modelDisplay, () => checkModel(normalizedSource, skuFacts));
+      addCheck('CPU class', skuFacts.cpuClass, () => checkCpuClass(normalizedSource, skuFacts.cpuClass));
+      addCheck('CPU speed', skuFacts.speedGHz ? `${skuFacts.speedGHz}GHz` : '', () => checkSpeed(normalizedSource, skuFacts.speedGHz));
+      addCheck('RAM', skuFacts.ramGB ? `${skuFacts.ramGB}GB` : '', () => checkNumberWithUnit(normalizedSource, skuFacts.ramGB, 'GB', 'RAM'));
+      addCheck('Storage', skuFacts.storageDisplay, () => checkStorage(normalizedSource, skuFacts.storageGB));
+      addCheck('Color', skuFacts.color, () => checkColor(normalizedSource, skuFacts.color));
+      addCheck('Touchscreen', skuFacts.touchscreen ? 'Touchscreen' : '', () => checkTouchscreen(normalizedSource));
+      addCheck('Resolution option', skuFacts.resolution, () => checkResolution(normalizedSource, skuFacts.resolution));
+
+      // If the compact SKU model token is not literally present, do not keep a noisy
+      // warning when the decoded family plus most hardware specs already match.
+      // Example: L5440 should match Latitude 5440; PB445G7 should match ProBook 445 (G7).
+      const matchRatio = checks ? ok / checks : 0;
+      const onlySoftModelWarning = conflicts === 0 && warnings > 0 && issues.every(isSoftModelIssue);
+      if (onlySoftModelWarning && ok >= 3 && matchRatio >= 0.6) {
+        warnings = 0;
+        issues.length = 0;
+        for (const fact of factLines) {
+          if (fact.label === 'Product/model' && fact.status === 'missing') {
+            fact.status = 'ok';
+            fact.mark = '✓';
+            fact.expected += ' (accepted by matching specs)';
+          }
         }
       }
-      return out;
-    }
 
-    function getItem(row, colIndex) {
-      const read = key => colIndex[key] >= 0 ? safeCell(row[colIndex[key]]) : '';
-      return {
-        inventoryid: read('inventoryid'), poid: read('poid'), itemid: read('itemid'), itemnumber: read('itemnumber'), mfgr: read('mfgr'),
-        description: read('description'), serialnumber: read('serialnumber'), status: read('status'), receivestatus: read('receivestatus'), warehouse: read('warehouse'),
-        location: read('location'), rep: read('rep'), conditioncode: read('conditioncode'), qty: read('qty'), unitcost: read('unitcost'), hascomments: read('hascomments'),
-        inventorycomments: read('inventorycomments'), gpu: read('gpu'), category: read('category'), suggestedprice: read('suggestedprice')
-      };
-    }
-
-    function analyzeRow(item) {
-      const comment = normalizeText(item.inventorycomments);
-      const facts = parseExpectedFacts(item);
-      const mismatch = [];
-      const warning = [];
-      const checks = [];
-      const signals = parseCommentSignals(comment);
-
-      if (!comment) {
-        mismatch.push('Missing inventory comments');
-        checks.push(check('Inventory comment', 'conflict', 'No inventory comment was available to compare against expected facts.'));
-        return buildResult(item, facts, mismatch, warning, checks, signals);
+      if (!checks && !issues.length) {
+        warnings++;
+        issues.push('Could not decode enough SKU facts to compare.');
       }
 
-      addFactCheck('Brand', facts.brand, () => {
-        const found = detectBrand(comment);
-        if (facts.brand && tokenFound(comment, facts.brand)) return ['ok', `Found ${facts.brand}.`];
-        if (found && found !== facts.brand) return ['conflict', `Expected ${facts.brand}, found ${found}.`];
-        return ['missing', `Expected ${facts.brand}, but brand was not clearly stated.`];
-      }, facts.brand ? true : false);
-
-      addFactCheck('Model/family', facts.modelName, () => {
-        if (modelFound(comment, facts.modelName, facts.modelTokens)) return ['ok', `Found ${facts.modelName}.`];
-        const other = detectOtherModel(comment, facts.brand);
-        if (other && !textLooksRelated(other, facts.modelTokens)) return ['conflict', `Expected ${facts.modelName}, found ${other}.`];
-        return ['missing', `Expected ${facts.modelName}, but the exact model/family was not clearly stated.`];
-      }, facts.modelName ? true : false);
-
-      addFactCheck('Apple/model code', facts.modelCodes.length ? facts.modelCodes.join('/') : '', () => {
-        const expectedFound = facts.modelCodes.some(code => tokenFound(comment, code));
-        const commentCodes = extractModelCodes(comment);
-        if (expectedFound) return ['ok', `Found model code ${facts.modelCodes.join('/')}.`];
-        if (commentCodes.length) return ['conflict', `Expected ${facts.modelCodes.join('/')}, found ${unique(commentCodes).join(', ')}.`];
-        return ['missing', `Expected ${facts.modelCodes.join('/')}, but no model code was found.`];
-      }, facts.modelCodes.length > 0);
-
-      addFactCheck('CPU', facts.cpu, () => {
-        const cpus = extractCPUs(comment);
-        if (facts.cpu && cpus.some(c => normalizeCPU(c) === normalizeCPU(facts.cpu))) return ['ok', `Found ${facts.cpu}.`];
-        if (cpus.length) return ['conflict', `Expected ${facts.cpu}, found ${unique(cpus).join(', ')}.`];
-        return ['missing', `Expected ${facts.cpu}, but CPU was not clearly stated.`];
-      }, facts.cpu ? true : false);
-
-      addFactCheck('CPU speed', facts.speedGHz ? facts.speedGHz + 'GHz' : '', () => {
-        const speeds = extractSpeeds(comment);
-        if (speeds.some(v => nearlyEqual(v, facts.speedGHz))) return ['ok', `Found ${facts.speedGHz}GHz.`];
-        if (speeds.length) return ['conflict', `Expected ${facts.speedGHz}GHz, found ${unique(speeds).map(v => v + 'GHz').join(', ')}.`];
-        return ['missing', `Expected ${facts.speedGHz}GHz, but CPU speed was not clearly stated.`];
-      }, Boolean(facts.speedGHz));
-
-      addFactCheck('RAM', facts.ramGB ? facts.ramGB + 'GB' : '', () => {
-        const commentFacts = extractMemoryAndStorage(comment);
-        if (commentFacts.ramGB.includes(facts.ramGB)) return ['ok', `Found ${facts.ramGB}GB RAM.`];
-        if (commentFacts.ramGB.length) return ['conflict', `Expected ${facts.ramGB}GB RAM, found ${unique(commentFacts.ramGB).map(v => v + 'GB').join(', ')}.`];
-        return ['missing', `Expected ${facts.ramGB}GB RAM, but RAM was not clearly stated.`];
-      }, Boolean(facts.ramGB));
-
-      addFactCheck('Storage', facts.storageGB ? formatGB(facts.storageGB) : '', () => {
-        const commentFacts = extractMemoryAndStorage(comment);
-        if (commentFacts.storageGB.includes(facts.storageGB)) return ['ok', `Found ${formatGB(facts.storageGB)} storage.`];
-        if (commentFacts.storageGB.length) return ['conflict', `Expected ${formatGB(facts.storageGB)} storage, found ${unique(commentFacts.storageGB).map(formatGB).join(', ')}.`];
-        return ['missing', `Expected ${formatGB(facts.storageGB)} storage, but storage was not clearly stated.`];
-      }, Boolean(facts.storageGB));
-
-      addFactCheck('Screen size', facts.screen, () => {
-        const screens = extractScreens(comment);
-        if (screens.some(v => String(v) === String(facts.screen))) return ['ok', `Found ${facts.screen} inch screen size.`];
-        if (screens.length) return ['missing', `Expected ${facts.screen} inch screen; comment has ${unique(screens).join(', ')} inch. Screen differences are review-only unless product identity is also wrong.`];
-        return ['missing', `Expected ${facts.screen} inch screen; screen size was not found. Screen is treated as optional context.`];
-      }, Boolean(facts.screen), { optional: true });
-
-      addFactCheck('Network', facts.network, () => {
-        if (facts.network === 'WIFI' && hasContradictingNetwork(comment, facts.network)) return ['conflict', 'Expected WiFi-only wording, but cellular/LTE wording was found without matching WiFi-only context.'];
-        if (facts.network && tokenFound(comment, facts.network)) return ['ok', `Found ${facts.network}.`];
-        return ['missing', `Expected ${facts.network}; network wording was not found. Network is treated as optional unless contradicted.`];
-      }, Boolean(facts.network), { optional: true });
-
-      addFactCheck('Color', facts.color, () => {
-        if (facts.color && tokenFound(comment, facts.color)) return ['ok', `Found ${facts.color}.`];
-        const foundColor = detectColor(comment);
-        if (foundColor && foundColor !== facts.color) return ['missing', `Expected ${facts.color}, found ${foundColor}. Color is review-only.`];
-        return ['missing', `Expected ${facts.color}; color was not stated. Color is review-only.`];
-      }, Boolean(facts.color), { optional: true });
-
-      checks.forEach(c => {
-        if (c.status === 'conflict') mismatch.push(c.name + ' mismatch: ' + c.note);
-        else if (c.status === 'missing' && !c.optional) warning.push(c.name + ' not found: ' + c.note);
-      });
-
-      return buildResult(item, facts, mismatch, warning, checks, signals);
-
-      function addFactCheck(name, expected, fn, enabled, options = {}) {
-        if (!enabled) { checks.push(check(name, 'skip', 'No strong expected value was detected from the row.', options)); return; }
-        const [status, note] = fn();
-        checks.push(check(name, status, note, { ...options, expected }));
-      }
-    }
-
-    function check(name, status, note, extra = {}) { return { name, status, note, optional: Boolean(extra.optional), expected: extra.expected || '' }; }
-
-    function buildResult(item, facts, mismatch, warning, checks, signals) {
-      const comparable = checks.filter(c => c.status !== 'skip' && !c.optional);
-      const ok = comparable.filter(c => c.status === 'ok').length;
-      const possible = comparable.length || 1;
-      const severity = mismatch.length ? 'Mismatch' : (warning.length ? 'Warning' : 'Pass');
-      const score = severity === 'Mismatch' ? Math.round((ok / possible) * 100) : Math.round((ok / possible) * 100);
-      const narrative = buildNarrative(severity, facts, checks, mismatch, warning, signals);
+      const severity = conflicts ? 'Mismatch' : warnings ? 'Warning' : 'Pass';
+      const score = checks ? Math.round((ok / checks) * 100) : 0;
       return {
-        inventoryid: item.inventoryid, poid: item.poid, itemid: item.itemid, itemnumber: item.itemnumber, mfgr: item.mfgr,
-        description: item.description, serialnumber: item.serialnumber, status: item.status, receivestatus: item.receivestatus, warehouse: item.warehouse,
-        location: item.location, rep: item.rep, conditioncode: item.conditioncode, qty: item.qty, unitcost: item.unitcost, inventorycomments: item.inventorycomments,
-        severity, score, reasons: mismatch.concat(warning), expectedFacts: formatFacts(facts), checks, signals, narrative
+        itemid: item.itemid,
+        sku: item.sku,
+        severity,
+        score,
+        issues: issues.length ? issues : ['No inconsistency found.'],
+        factLines,
+        sourceText
       };
     }
 
-    function buildNarrative(severity, facts, checks, mismatch, warning, signals) {
-      const okNames = checks.filter(c => c.status === 'ok').map(c => c.name);
-      const missingNames = checks.filter(c => c.status === 'missing' && !c.optional).map(c => c.name);
-      const conflictNames = checks.filter(c => c.status === 'conflict').map(c => c.name);
-      const optionalMissing = checks.filter(c => c.status === 'missing' && c.optional).map(c => c.name);
-      let text = `${severity}: `;
-      if (conflictNames.length) text += `clear contradiction in ${conflictNames.join(', ')}. `;
-      else if (missingNames.length) text += `no direct contradiction, but expected ${missingNames.join(', ')} detail was not found. `;
-      else text += 'all comparable required facts were confirmed. ';
-      if (okNames.length) text += `Confirmed: ${okNames.join(', ')}. `;
-      if (optionalMissing.length) text += `Optional context not found or not exact: ${optionalMissing.join(', ')}. `;
-      const commentBits = [];
-      if (signals.hasTestingDone) commentBits.push('testing note present');
-      if (signals.hasQCDone) commentBits.push('QC note present');
-      if (signals.batteryPercent !== null) commentBits.push(`battery ${signals.batteryPercent}%`);
-      if (signals.defects.length) commentBits.push(`defect words: ${signals.defects.slice(0, 6).join(', ')}`);
-      if (commentBits.length) text += `Comment signals: ${commentBits.join('; ')}.`;
-      return text.trim();
+    function isSoftModelIssue(message) {
+      const msg = normalizeText(message);
+      return msg.startsWith('MODEL MISSING') ||
+        msg.startsWith('PRODUCT/MODEL CODE MISSING') ||
+        msg.includes('MODEL CODE MISSING') ||
+        msg.includes('PRODUCT/MODEL MISSING');
     }
 
-    function parseExpectedFacts(item) {
-      const sku = normalizeText(item.itemnumber);
-      const desc = normalizeText(item.description);
-      const mfgr = normalizeText(item.mfgr);
-      const gpu = normalizeText(item.gpu);
-      const combined = normalizeText([item.description, item.itemnumber, item.mfgr, item.category, item.gpu].join(' '));
-      const parts = sku.split('-').map(v => v.trim()).filter(Boolean);
-      const mem = extractMemoryAndStorage(desc);
-      const facts = {
-        brand: detectBrand(mfgr) || detectBrand(combined) || '',
-        modelName: extractModelName(desc, mfgr, parts),
-        modelTokens: [], modelCodes: extractModelCodes(desc), cpu: '', speedGHz: null, ramGB: null, storageGB: null, screen: null, family: '', network: '', color: '', gpu: gpu
+    function parseSkuFacts(rawSku, rawMfgr) {
+      const sku = normalizeText(rawSku).replace(/\s+/g, '');
+      const mfgr = normalizeText(rawMfgr);
+      const parts = sku.split('-').filter(Boolean);
+      const modelCode = parts[0] || '';
+      const cpuCode = parts[1] || '';
+      const speedPart = parts[2] || '';
+      const ramPart = parts[3] || '';
+      const storagePart = parts[4] || '';
+      const colorPart = parts[5] || '';
+      const optionParts = parts.slice(6);
+      const model = decodeModel(modelCode, mfgr);
+      const storage = decodeStorage(storagePart);
+      return {
+        sku,
+        modelCode,
+        modelDisplay: model.display,
+        modelAliases: model.aliases,
+        cpuClass: decodeCpuClass(cpuCode),
+        speedGHz: /^\d+(?:\.\d+)?$/.test(speedPart) ? Number(speedPart) : null,
+        ramGB: /^\d+$/.test(ramPart) ? Number(ramPart) : null,
+        storageGB: storage.gb,
+        storageDisplay: storage.display,
+        color: decodeColor(colorPart),
+        touchscreen: optionParts.includes('TS') || /-TS\b/.test(sku),
+        resolution: model.resolution || (optionParts.includes('UHD') ? 'UHD' : '')
       };
-      facts.modelTokens = modelTokens(facts.modelName);
-      const cpus = extractCPUs(desc);
-      facts.cpu = cpus[0] || skuCPU(parts) || '';
-      const speeds = extractSpeeds(desc);
-      facts.speedGHz = speeds[0] || skuSpeed(parts);
-      facts.ramGB = mem.ramGB[0] || skuRam(parts);
-      facts.storageGB = mem.storageGB[0] || skuStorage(parts);
-      const screens = extractScreens(desc);
-      facts.screen = screens[0] || skuScreen(parts);
-      facts.network = /\b(WIFI|WI-FI)\b/.test(combined) ? 'WIFI' : '';
-      facts.color = detectColor(combined) || skuColor(parts);
-
-      const prefix = parts[0] || sku;
-      let gen = prefix.match(/^IPDM(\d+)/);
-      if (gen) facts.family = `IPAD MINI ${gen[1]}`;
-      gen = prefix.match(/^IPDA(\d+)/);
-      if (gen) facts.family = `IPAD AIR ${gen[1]}`;
-      gen = prefix.match(/^IPD(\d+)/);
-      if (gen) facts.family = `IPAD ${gen[1]}`;
-      if (facts.family && !facts.modelName) facts.modelName = facts.family;
-      if (facts.modelName && !facts.modelTokens.length) facts.modelTokens = modelTokens(facts.modelName);
-      return facts;
     }
 
-    function extractModelName(desc, mfgr, parts) {
-      let text = normalizeText(desc).replace(/\b(DELL|HP|LENOVO|APPLE|MICROSOFT|SAMSUNG|ACER|ASUS)\b/g, ' ').replace(/\s+/g, ' ').trim();
+    function decodeModel(code, mfgr) {
+      const c = normalizeText(code).replace(/[^A-Z0-9]/g, '');
+      const aliases = [];
+      let display = '';
+      let resolution = '';
+
+      function out(name, extraAliases = []) {
+        display = name;
+        aliases.push(name, ...extraAliases);
+        return { display, aliases: unique(aliases.filter(Boolean)), resolution };
+      }
+
+      if (!c) return { display: '', aliases: [], resolution: '' };
+
+      let m;
+      if ((m = c.match(/^L(\d{4})$/))) return out(`Latitude ${m[1]}`, [`L${m[1]}`, `L ${m[1]}`, m[1]]);
+      if ((m = c.match(/^P(\d{4})$/))) return out(`Precision ${m[1]}`, [`P${m[1]}`, `P ${m[1]}`, m[1]]);
+      if ((m = c.match(/^EB(\d{3})G(\d+)$/))) return out(`EliteBook ${m[1]} G${m[2]}`, [`EliteBook ${m[1]} Gen ${m[2]}`, `EliteBook ${m[1]} (G${m[2]})`, `${m[1]} G${m[2]}`, `${m[1]} (G${m[2]})`]);
+      if ((m = c.match(/^PB(\d{3})G(\d+)$/))) return out(`ProBook ${m[1]} G${m[2]}`, [`ProBook ${m[1]} Gen ${m[2]}`, `ProBook ${m[1]} (G${m[2]})`, `${m[1]} G${m[2]}`, `${m[1]} (G${m[2]})`]);
+      if ((m = c.match(/^EX2G(\d+)[A-Z]?$/))) return out(`Elite x2 G${m[1]}`, [`Elite X2 Gen ${m[1]}`, `Elite x2 (G${m[1]})`, `X2 G${m[1]}`, `X2 (G${m[1]})`]);
+      if ((m = c.match(/^L13G(\d+)$/))) return out(`ThinkPad L13 Gen ${m[1]}`, [`L13 G${m[1]}`, `L13 (G${m[1]})`, `L13 Gen ${m[1]}`]);
+      if ((m = c.match(/^P1G(\d+)$/))) return out(`ThinkPad P1 Gen ${m[1]}`, [`P1 G${m[1]}`, `P1 (G${m[1]})`, `P1 Gen ${m[1]}`]);
+      if ((m = c.match(/^T14SG(\d+)$/))) return out(`ThinkPad T14s Gen ${m[1]}`, [`T14s G${m[1]}`, `T14s (G${m[1]})`, `T14s Gen ${m[1]}`]);
+      if ((m = c.match(/^X1CG(\d+)$/))) return out(`ThinkPad X1 Carbon Gen ${m[1]}`, [`X1 Carbon G${m[1]}`, `X1 Carbon (G${m[1]})`, `X1 Carbon Gen ${m[1]}`]);
+      if ((m = c.match(/^X1YG(\d+)(U?)$/))) { resolution = m[2] ? 'UHD' : ''; return out(`ThinkPad X1 Yoga Gen ${m[1]}`, [`X1 Yoga G${m[1]}`, `X1 Yoga (G${m[1]})`, `X1 Yoga Gen ${m[1]}`]); }
+      if ((m = c.match(/^SURB3(\d{4})$/))) return out(`Surface Book 3 ${m[1]}`, [`Surface Book 3`, m[1]]);
+      if ((m = c.match(/^SURG3(\d{4})$/))) return out(`Surface Go 3 ${m[1]}`, [`Surface Go 3`, m[1]]);
+      if ((m = c.match(/^SUR3(\d{4})$/))) return out(`Surface Laptop 3 ${m[1]}`, [`Surface Lap 3 ${m[1]}`, `Surface Laptop 3`, `Surface Lap 3`, m[1]]);
+      if ((m = c.match(/^SUR4(\d{4})$/))) return out(`Surface Laptop 4 ${m[1]}`, [`Surface Lap 4 ${m[1]}`, `Surface Laptop 4`, `Surface Lap 4`, m[1]]);
+      if ((m = c.match(/^SURP6(\d{4})$/))) return out(`Surface Pro 6 ${m[1]}`, [`Surface Pro 6`, m[1]]);
+      if (/^[A-Z0-9]+LLA$/.test(c)) return out(c.replace(/LLA$/, 'LL/A'), [c, c.replace(/LLA$/, 'LL/A')]);
+
+      return out(c, [c]);
+    }
+
+    function decodeCpuClass(code) {
+      const c = normalizeText(code);
+      if (/^I3/.test(c)) return 'i3';
+      if (/^I5/.test(c)) return 'i5';
+      if (/^I7/.test(c)) return 'i7';
+      if (/^I9/.test(c)) return 'i9';
+      if (/^R3/.test(c)) return 'Ryzen 3';
+      if (/^R5/.test(c)) return 'Ryzen 5';
+      if (/^R7/.test(c)) return 'Ryzen 7';
+      if (/^R9/.test(c)) return 'Ryzen 9';
+      if (/^M1/.test(c)) return 'M1';
+      if (/^M2/.test(c)) return 'M2';
+      if (/^M3/.test(c)) return 'M3';
+      return '';
+    }
+
+    function decodeStorage(part) {
+      const p = normalizeText(part);
+      let m = p.match(/^(\d+)T/);
+      if (m) return { gb: Number(m[1]) * 1024, display: `${m[1]}TB` };
+      m = p.match(/^(\d+)S?$/);
+      if (m) return { gb: Number(m[1]), display: `${m[1]}GB` };
+      return { gb: null, display: '' };
+    }
+
+    function decodeColor(part) {
+      const map = { GY: 'Gray', SG: 'Space Gray', SV: 'Silver', BL: 'Black', WH: 'White', GD: 'Gold' };
+      return map[normalizeText(part)] || '';
+    }
+
+    function buildSourceText(item) {
+      return [item.title, item.description, item.extdescription].map(safeCell).filter(Boolean).join(' | ');
+    }
+
+    function checkModel(text, facts) {
+      if (!facts.modelDisplay) return { status: 'optional' };
+      if (!text) return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; title/description is blank.` };
+
+      // Fuzzy lookup: the compact SKU prefix does not need to appear literally.
+      // Example matches accepted by this function:
+      // L5440 -> Latitude 5440, P7560 -> Precision 7560,
+      // EB850G8 -> EliteBook 850 (G8), X1CG10 -> X1 Carbon (G10),
+      // SUR41951 -> Surface Lap 4 1951.
+      const aliases = unique([facts.modelDisplay, ...(facts.modelAliases || []), facts.modelCode].filter(Boolean));
+      if (aliases.some(alias => phraseFound(text, alias) || fuzzyPhraseFound(text, alias))) return { status: 'ok' };
+
+      const fuzzy = fuzzyModelScore(text, facts);
+      if (fuzzy.score >= 0.72) return { status: 'ok' };
+
+      const numeric = (facts.modelDisplay.match(/\b\d{3,5}\b/) || [])[0];
+      const familyWord = normalizeText(facts.modelDisplay).split(' ')[0];
+      if (numeric && phraseFound(text, numeric)) {
+        const found = extractLikelyModel(text);
+        if (!found) return { status: 'ok' };
+        const foundNorm = normalizeText(found);
+        if (foundNorm.includes(numeric) || foundNorm.includes(familyWord)) return { status: 'ok' };
+      }
+
+      const found = extractLikelyModel(text);
+      if (found && fuzzy.score < 0.45) {
+        return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; title/description appears to say ${found}.` };
+      }
+      return { status: 'missing', message: `Model not confidently matched: SKU says ${facts.modelDisplay}; closest fuzzy match was ${Math.round(fuzzy.score * 100)}%.` };
+    }
+
+    function fuzzyModelScore(text, facts) {
+      const aliases = unique([facts.modelDisplay, ...(facts.modelAliases || []), facts.modelCode].filter(Boolean));
+      const sourceTokens = fuzzyTokens(text);
+      const compactSource = compactFuzzy(text);
+      let best = { score: 0, alias: '' };
+
+      for (const alias of aliases) {
+        const aliasTokens = fuzzyTokens(alias);
+        if (!aliasTokens.length) continue;
+
+        let matched = 0;
+        for (const token of aliasTokens) {
+          if (sourceTokens.some(sourceToken => fuzzyTokenMatch(token, sourceToken))) matched++;
+        }
+        let score = matched / aliasTokens.length;
+
+        const compactAlias = compactFuzzy(alias);
+        if (compactAlias && compactSource.includes(compactAlias)) score = Math.max(score, 1);
+
+        // Avoid requiring generic words such as THINKPAD or LAPTOP when the unique model
+        // number/generation is present. This keeps the lookup useful for abbreviated titles.
+        const important = aliasTokens.filter(t => !['DELL','HP','LENOVO','MICROSOFT','THINKPAD','LAPTOP','NOTEBOOK'].includes(t));
+        if (important.length) {
+          const importantMatched = important.filter(token => sourceTokens.some(sourceToken => fuzzyTokenMatch(token, sourceToken))).length;
+          score = Math.max(score, importantMatched / important.length);
+        }
+
+        if (score > best.score) best = { score, alias };
+      }
+      return best;
+    }
+
+    function fuzzyPhraseFound(text, phrase) {
+      const phraseTokens = fuzzyTokens(phrase);
+      if (!phraseTokens.length) return false;
+      const sourceTokens = fuzzyTokens(text);
+      const important = phraseTokens.filter(t => !['DELL','HP','LENOVO','MICROSOFT','THINKPAD','LAPTOP','NOTEBOOK'].includes(t));
+      const tokensToCheck = important.length ? important : phraseTokens;
+      const matched = tokensToCheck.filter(token => sourceTokens.some(sourceToken => fuzzyTokenMatch(token, sourceToken))).length;
+      return matched / tokensToCheck.length >= 0.72;
+    }
+
+    function fuzzyTokens(value) {
+      return normalizeText(value)
+        .replace(/[()\[\],]/g, ' ')
+        .replace(/\bGEN\s*(\d+)\b/g, 'G$1')
+        .replace(/\bG\s+(\d+)\b/g, 'G$1')
+        .replace(/\bLAP\b/g, 'LAPTOP')
+        .replace(/\bELITE\s+BOOK\b/g, 'ELITEBOOK')
+        .replace(/\bPRO\s+BOOK\b/g, 'PROBOOK')
+        .split(/[^A-Z0-9.]+/)
+        .filter(Boolean);
+    }
+
+    function compactFuzzy(value) {
+      return normalizeText(value)
+        .replace(/\bGEN\s*(\d+)\b/g, 'G$1')
+        .replace(/\bG\s+(\d+)\b/g, 'G$1')
+        .replace(/\bLAP\b/g, 'LAPTOP')
+        .replace(/[^A-Z0-9]/g, '');
+    }
+
+    function fuzzyTokenMatch(expected, actual) {
+      if (expected === actual) return true;
+      if (/^\d+$/.test(expected) || /^\d+$/.test(actual)) return expected === actual;
+      if (/^G\d+$/.test(expected) && (actual === expected.slice(1) || actual === expected)) return true;
+      if (/^G\d+$/.test(actual) && (expected === actual.slice(1) || expected === actual)) return true;
+      if (expected === 'LAPTOP' && actual === 'LAP') return true;
+      if (expected === 'LAP' && actual === 'LAPTOP') return true;
+      if (expected.length <= 2 || actual.length <= 2) return false;
+      return similarity(expected, actual) >= 0.86;
+    }
+
+    function similarity(a, b) {
+      a = String(a || '');
+      b = String(b || '');
+      if (!a && !b) return 1;
+      if (!a || !b) return 0;
+      const distance = levenshtein(a, b);
+      return 1 - distance / Math.max(a.length, b.length);
+    }
+
+    function levenshtein(a, b) {
+      const dp = Array.from({ length: a.length + 1 }, () => Array(b.length + 1).fill(0));
+      for (let i = 0; i <= a.length; i++) dp[i][0] = i;
+      for (let j = 0; j <= b.length; j++) dp[0][j] = j;
+      for (let i = 1; i <= a.length; i++) {
+        for (let j = 1; j <= b.length; j++) {
+          const cost = a[i - 1] === b[j - 1] ? 0 : 1;
+          dp[i][j] = Math.min(dp[i - 1][j] + 1, dp[i][j - 1] + 1, dp[i - 1][j - 1] + cost);
+        }
+      }
+      return dp[a.length][b.length];
+    }
+
+    function checkCpuClass(text, cpuClass) {
+      if (!text) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; title/description is blank.` };
+      const cls = normalizeText(cpuClass).replace(/\s+/g, '').toLowerCase();
+      const found = extractCpuClasses(text);
+      if (found.includes(cls)) return { status: 'ok' };
+      if (found.length) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; title/description says ${found.join(', ')}.` };
+      return { status: 'missing', message: `CPU missing from title/description: SKU says ${cpuClass}.` };
+    }
+
+    function checkSpeed(text, speed) {
+      if (!text) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; title/description is blank.` };
+      const speeds = extractSpeeds(text);
+      if (speeds.some(v => Math.abs(v - speed) < 0.06)) return { status: 'ok' };
+      if (speeds.length) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; title/description says ${speeds.map(v => v + 'GHz').join(', ')}.` };
+      return { status: 'missing', message: `CPU speed missing from title/description: SKU says ${speed}GHz.` };
+    }
+
+    function checkNumberWithUnit(text, value, unit, label) {
+      if (!text) return { status: 'conflict', message: `${label} mismatch: SKU says ${value}${unit}; title/description is blank.` };
+      const values = extractGBValues(text);
+      if (values.includes(value)) return { status: 'ok' };
+      // If checking RAM, avoid treating storage-only GB values as a hard mismatch when there is no obvious RAM field.
+      if (label === 'RAM') {
+        const ramValues = extractRamValues(text);
+        if (ramValues.includes(value)) return { status: 'ok' };
+        if (ramValues.length) return { status: 'conflict', message: `RAM mismatch: SKU says ${value}GB; title/description says ${ramValues.join(', ')}GB.` };
+      }
+      return { status: 'missing', message: `${label} missing from title/description: SKU says ${value}${unit}.` };
+    }
+
+    function checkStorage(text, storageGB) {
+      if (!text) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; title/description is blank.` };
+      const values = extractStorageValues(text);
+      if (values.includes(storageGB)) return { status: 'ok' };
+      if (values.length) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; title/description says ${values.map(formatStorage).join(', ')}.` };
+      return { status: 'missing', message: `Storage missing from title/description: SKU says ${formatStorage(storageGB)}.` };
+    }
+
+    function checkColor(text, color) {
+      if (!text) return { status: 'missing', message: `Color missing from title/description: SKU says ${color}.` };
+      const expected = normalizeText(color);
+      if (expected === 'GRAY' && /\b(GY|GRAY|GREY)\b/.test(text)) return { status: 'ok' };
+      if (expected === 'SPACE GRAY' && /\b(SG|SPACE GRAY|SPACE GREY)\b/.test(text)) return { status: 'ok' };
+      if (expected === 'SILVER' && /\b(SV|SILVER)\b/.test(text)) return { status: 'ok' };
+      if (expected === 'BLACK' && /\b(BL|BLACK)\b/.test(text)) return { status: 'ok' };
+      const other = extractColor(text);
+      if (other) return { status: 'conflict', message: `Color mismatch: SKU says ${color}; title/description says ${other}.` };
+      return { status: 'optional' };
+    }
+
+    function checkTouchscreen(text) {
+      if (/\b(TOUCH|TOUCHSCREEN|TS)\b/.test(text)) return { status: 'ok' };
+      return { status: 'optional' };
+    }
+
+    function checkResolution(text, resolution) {
+      const r = normalizeText(resolution);
+      if (r && phraseFound(text, r)) return { status: 'ok' };
+      if (r === 'UHD' && /\bFHD\b/.test(text)) return { status: 'conflict', message: 'Resolution mismatch: SKU says UHD; title/description says FHD.' };
+      return { status: 'optional' };
+    }
+
+    function extractLikelyModel(text) {
       const patterns = [
-        /\b(LATITUDE\s+\d{3,5})\b/, /\b(PRECISION\s+\d{3,5})\b/, /\b(ELITE\s*X2(?:\s+TABLET)?\s*\(?G?\d+\)?)\b/,
-        /\b(ELITEBOOK\s+\d{3,5}\s*G\d+)\b/, /\b(PROBOOK\s+\d{3,5}\s*G\d+)\b/, /\b(ZBOOK\s+[A-Z0-9 ]+?\s*G\d+)\b/,
-        /\b(THINKPAD\s+[A-Z0-9-]+)\b/, /\b(SURFACE\s+(?:PRO|BOOK|LAPTOP)\s*\d*)\b/,
-        /\b(MACBOOK\s+(?:PRO|AIR)\s*\d*)\b/, /\b(IPAD\s+(?:MINI|AIR|PRO)?\s*\d*)\b/
+        /\b(LATITUDE\s+\d{4})\b/, /\b(PRECISION\s+\d{4})\b/,
+        /\b(ELITEBOOK\s+\d{3}\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(PROBOOK\s+\d{3}\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(ELITE\s+X2\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(SURFACE\s+(?:LAP|LAPTOP|BOOK|GO|PRO)\s+\d(?:\s+\d{4})?)\b/,
+        /\b(X1\s+(?:CARBON|YOGA)\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(T14S\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(L13\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/,
+        /\b(P1\s*(?:\(G\d+\)|G\d+|GEN\s+\d+)?)\b/
       ];
       for (const p of patterns) {
         const m = text.match(p);
-        if (m) return m[1].replace(/\s+/g, ' ').trim();
+        if (m) return titleCase(m[1]);
       }
-      if (parts[0]) return parts[0];
       return '';
     }
 
-    function modelTokens(model) {
-      const text = normalizeText(model);
-      return unique((text.match(/[A-Z]+|\d{2,5}|G\d+/g) || []).filter(t => !['THE','AND','LAPTOP','TABLET'].includes(t)));
-    }
-
-    function modelFound(comment, modelName, tokens) {
-      if (!modelName) return false;
-      const c = normalizeText(comment);
-      if (tokenFound(c, modelName)) return true;
-      const strong = tokens.filter(t => /\d/.test(t) || t.length >= 4);
-      if (!strong.length) return false;
-      return strong.every(t => tokenFound(c, t));
-    }
-
-    function detectOtherModel(comment, expectedBrand) {
-      const text = normalizeText(comment);
-      const models = [
-        /\b(LATITUDE\s+\d{3,5})\b/, /\b(PRECISION\s+\d{3,5})\b/, /\b(ELITE\s*X2(?:\s+\(?G?\d+\)?)?)\b/,
-        /\b(ELITEBOOK\s+\d{3,5}\s*G\d+)\b/, /\b(PROBOOK\s+\d{3,5}\s*G\d+)\b/, /\b(ZBOOK\s+[A-Z0-9 ]+?\s*G\d+)\b/,
-        /\b(THINKPAD\s+[A-Z0-9-]+)\b/, /\b(SURFACE\s+(?:PRO|BOOK|LAPTOP)\s*\d*)\b/, /\b(MACBOOK\s+(?:PRO|AIR)\s*\d*)\b/, /\b(IPAD\s+(?:MINI|AIR|PRO)?\s*\d*)\b/
-      ];
-      for (const p of models) { const m = text.match(p); if (m) return m[1].trim(); }
-      return '';
-    }
-
-    function textLooksRelated(found, expectedTokens) {
-      const f = normalizeText(found);
-      return expectedTokens.some(t => tokenFound(f, t));
-    }
-
-    function detectBrand(text) {
-      const t = normalizeText(text);
-      const brands = ['DELL','HP','LENOVO','APPLE','MICROSOFT','SAMSUNG','ACER','ASUS','TOSHIBA','PANASONIC'];
-      return brands.find(b => tokenFound(t, b)) || '';
-    }
-
-    function detectColor(text) {
-      const t = normalizeText(text);
-      const map = [
-        ['SPACE GRAY', /\b(SPACE\s+GRAY|SPACEGRAY|SG)\b/], ['SILVER', /\b(SILVER|SV)\b/], ['BLACK', /\b(BLACK|BLK|BK)\b/],
-        ['GRAY', /\b(GRAY|GREY|GY)\b/], ['WHITE', /\bWHITE\b/], ['GOLD', /\bGOLD\b/], ['BLUE', /\bBLUE\b/]
-      ];
-      for (const [label, regex] of map) if (regex.test(t)) return label;
-      return '';
-    }
-
-    function skuColor(parts) {
-      const colorMap = { SG: 'SPACE GRAY', SV: 'SILVER', BL: 'BLACK', BK: 'BLACK', GY: 'GRAY', GR: 'GRAY', WH: 'WHITE', GL: 'GOLD' };
-      for (const p of parts.slice().reverse()) if (colorMap[p]) return colorMap[p];
-      return '';
-    }
-
-    function extractCPUs(text) {
-      const t = normalizeText(text);
+    function extractCpuClasses(text) {
       const out = [];
-      const patterns = [
-        /\bI[3579][\s-]*\d{4,5}[A-Z0-9]*\b/g,
-        /\bI[3579]\b/g,
-        /\bRYZEN\s*[3579][\s-]*\d{4,5}[A-Z0-9]*\b/g,
-        /\bM[1234](?:\s+PRO|\s+MAX)?\b/g,
-        /\bXEON\s+[A-Z0-9-]+\b/g
-      ];
-      patterns.forEach(p => (t.match(p) || []).forEach(v => out.push(v.replace(/\s+/g, ' ').replace(/I([3579])\s+/, 'I$1-'))));
-      return unique(out.map(v => v.replace(/\s*-\s*/g, '-')));
-    }
-
-    function normalizeCPU(cpu) { return normalizeText(cpu).replace(/\s+/g, '').replace(/I([3579])-?/, 'I$1-'); }
-
-    function skuCPU(parts) {
-      for (const p of parts) {
-        const m = p.match(/^I([3579])([A-Z0-9]{0,4})$/);
-        if (m) return 'I' + m[1];
+      const t = normalizeText(text).replace(/RYZEN\s+/, 'RYZEN');
+      const matches = t.match(/\b(?:I[3579]|RYZEN[3579]|M[123])(?:[-\s]?\d{3,5}[A-Z]{0,3})?\b/g) || [];
+      for (const m of matches) {
+        const v = m.replace(/[-\s].*/, '');
+        if (/^I[3579]/.test(v)) out.push(v.toLowerCase());
+        else if (/^RYZEN[3579]/.test(v)) out.push('ryzen' + v.replace('RYZEN', ''));
+        else out.push(v.toLowerCase());
       }
-      return '';
+      return unique(out);
     }
 
     function extractSpeeds(text) {
-      return unique((normalizeText(text).match(/\b\d(?:\.\d+)?\s*GHZ\b/g) || []).map(v => Number(v.replace(/[^0-9.]/g, '')))).filter(Boolean);
+      return unique((text.match(/\b\d+(?:\.\d+)?\s*GHZ\b/g) || []).map(v => Number(v.replace(/[^0-9.]/g, '')))).filter(v => !Number.isNaN(v));
     }
 
-    function skuSpeed(parts) {
-      for (const p of parts) if (/^\d(?:\.\d+)?$/.test(p)) return Number(p);
-      return null;
+    function extractGBValues(text) {
+      return unique((text.match(/\b\d{1,4}\s*GB\b/g) || []).map(v => Number(v.replace(/[^0-9]/g, '')))).filter(Boolean);
     }
 
-    function extractMemoryAndStorage(text) {
-      const t = normalizeText(text);
-      const ramGB = [];
-      const storageGB = [];
-      (t.match(/\b\d{1,4}\s*(?:GB|TB)\s*(?:SSD|HDD|EMMC|NVME|SATA|STORAGE)\b/g) || []).forEach(v => storageGB.push(capacityToGB(v)));
-      (t.match(/\b\d{1,4}\s*(?:GB|TB)\s*(?:RAM|MEMORY|DDR\d?)\b/g) || []).forEach(v => ramGB.push(capacityToGB(v)));
-      const dual = t.match(/\b(\d{1,3})\s*GB\s+(\d{2,4})\s*(GB|TB)\s*(SSD|HDD|EMMC|NVME)?\b/);
-      if (dual) { ramGB.push(Number(dual[1])); storageGB.push(capacityToGB(dual[2] + dual[3])); }
-      const afterCpu = t.match(/\bI[3579][\s-]*[A-Z0-9-]*\s+\d(?:\.\d+)?\s*GHZ\s+(\d{1,3})\s*GB\s+(\d{2,4})\s*(GB|TB)\b/);
-      if (afterCpu) { ramGB.push(Number(afterCpu[1])); storageGB.push(capacityToGB(afterCpu[2] + afterCpu[3])); }
-      return { ramGB: unique(ramGB).filter(Boolean), storageGB: unique(storageGB).filter(Boolean) };
-    }
-
-    function capacityToGB(value) {
-      const t = normalizeText(value);
-      const m = t.match(/(\d{1,4})\s*(GB|TB)/);
-      if (!m) return null;
-      return Number(m[1]) * (m[2] === 'TB' ? 1024 : 1);
-    }
-
-    function skuRam(parts) {
-      for (let i = 0; i < parts.length; i++) if (/^\d{1,3}$/.test(parts[i]) && Number(parts[i]) <= 128 && i >= 3) return Number(parts[i]);
-      return null;
-    }
-
-    function skuStorage(parts) {
-      for (const p of parts) {
-        const m = p.match(/^(\d+)(T|TB|S|G|GB|SSD|HDD)?$/);
-        if (!m) continue;
-        if (/T/.test(p)) return Number(m[1]) * 1024;
-        if (/S|SSD|HDD|GB|G/.test(p) && Number(m[1]) >= 32) return Number(m[1]);
+    function extractRamValues(text) {
+      const values = [];
+      const patterns = [/(?:^|\s)(\d{1,3})\s*GB\s+(?:RAM|MEMORY)\b/g, /\b(?:RAM|MEMORY)\s*(\d{1,3})\s*GB\b/g, /\b(?:I[3579]|RYZEN\s*[3579]|M[123])[-\w]*\s+\d+(?:\.\d+)?\s*GHZ\s+(\d{1,3})\s*GB\b/g];
+      for (const p of patterns) {
+        let m;
+        while ((m = p.exec(text)) !== null) values.push(Number(m[1]));
       }
-      return null;
+      // Most CTS titles follow CPU speed, RAM, storage. If two GB/TB facts exist, the first GB after speed is RAM.
+      const afterSpeed = text.match(/GHZ\s+(\d{1,3})\s*GB\s+(?:\d{2,4}\s*GB|\d+\s*TB)/);
+      if (afterSpeed) values.push(Number(afterSpeed[1]));
+      return unique(values).filter(Boolean);
     }
 
-    function extractScreens(text) {
-      const out = [];
-      const t = normalizeText(text).replace(/Ó/g, '"');
-      (t.match(/\b\d{1,2}(?:\.\d)?\s*(?:IN|INCH|\")\b/g) || []).forEach(v => out.push(String(Number(v.replace(/[^0-9.]/g, '')))));
-      return unique(out).filter(Boolean);
+    function extractStorageValues(text) {
+      const values = [];
+
+      // CTS title format is usually: CPU speed, RAM, then storage.
+      // Example: "2.5GHz 64GB 1TB". The 64GB is RAM, not storage.
+      const afterSpeed = text.match(/GHZ\s+\d{1,3}\s*GB\s+(\d+(?:\.\d+)?)\s*(TB|GB)\b/);
+      if (afterSpeed) {
+        const n = Number(afterSpeed[1]);
+        values.push(afterSpeed[2] === 'TB' ? n * 1024 : n);
+      }
+
+      const explicit = text.match(/\b(\d+(?:\.\d+)?)\s*(TB|GB)\s*(?:SSD|NVME|HDD|STORAGE|DRIVE)\b/g) || [];
+      for (const raw of explicit) {
+        const n = Number(raw.replace(/[^0-9.]/g, ''));
+        values.push(/TB\b/.test(raw) ? n * 1024 : n);
+      }
+
+      // Titles with only one capacity >= 64GB are usually storage.
+      const all = (text.match(/\b\d+(?:\.\d+)?\s*(?:TB|GB)\b/g) || []).map(raw => {
+        const n = Number(raw.replace(/[^0-9.]/g, ''));
+        return /TB\b/.test(raw) ? n * 1024 : n;
+      }).filter(v => v >= 64);
+      if (all.length === 1) values.push(all[0]);
+      if (all.some(v => v >= 1024)) values.push(...all.filter(v => v >= 1024));
+
+      return unique(values).filter(Boolean);
     }
 
-    function skuScreen(parts) {
-      for (const p of parts) if (/^\d{1,2}(?:\.\d)?$/.test(p) && Number(p) >= 7 && Number(p) <= 18) return String(Number(p));
-      return null;
+    function extractColor(text) {
+      if (/\b(SPACE GRAY|SPACE GREY|SG)\b/.test(text)) return 'Space Gray';
+      if (/\b(SILVER|SV)\b/.test(text)) return 'Silver';
+      if (/\b(BLACK|BL)\b/.test(text)) return 'Black';
+      if (/\b(GRAY|GREY|GY)\b/.test(text)) return 'Gray';
+      if (/\b(WHITE|WH)\b/.test(text)) return 'White';
+      if (/\b(GOLD|GD)\b/.test(text)) return 'Gold';
+      return '';
     }
 
-    function extractModelCodes(text) {
-      return unique((normalizeText(text).match(/\bA\s*\d{4}\b/g) || []).map(v => v.replace(/\s+/g, '')));
+    function phraseFound(text, phrase) {
+      const t = normalizeText(text).replace(/\//g, '');
+      const p = normalizeText(phrase).replace(/\//g, '');
+      if (!p) return false;
+      if (/^\d+$/.test(p)) return new RegExp(`\\b${escapeRegExp(p)}\\b`).test(t);
+      const loose = escapeRegExp(p).replace(/\\ /g, '[\\s-]*');
+      return new RegExp(`(^|[^A-Z0-9])${loose}([^A-Z0-9]|$)`).test(t);
     }
 
-    function hasContradictingNetwork(comment, expectedNetwork) {
-      if (expectedNetwork !== 'WIFI') return false;
-      const c = normalizeText(comment);
-      return /\b(CELLULAR|LTE|4G|5G|WIFI\s*\+\s*CELLULAR|WI-FI\s*\+\s*CELLULAR)\b/.test(c) && !/\bWIFI\s+ONLY\b|\bWI-FI\s+ONLY\b/.test(c);
-    }
-
-    function parseCommentSignals(comment) {
-      const c = normalizeText(comment);
-      const battery = c.match(/\bBATTERY\s*(\d{1,3}(?:\.\d+)?)\s*%/);
-      const defects = [];
-      const defectWords = ['SCRATCH','SCRATCHES','DENT','DENTS','DISCOLORED','MARKS','CRACK','CRACKED','MISSING','KEYBOARD IMPRESSIONS','LCD','DISPLAY','CASE','HEAVY','MINOR'];
-      defectWords.forEach(w => { if (tokenFound(c, w)) defects.push(w); });
-      return {
-        hasTestingDone: /\bTESTING\s+DONE\b/.test(c), hasQCDone: /\bQC\s+DONE\b/.test(c),
-        batteryPercent: battery ? Number(battery[1]) : null, hasVendorSpecs: /\bVENDOR\s*S?\s*(SPECS|NOTES)\b/.test(c), defects: unique(defects)
-      };
-    }
-
-    function formatFacts(facts) {
-      const out = [];
-      if (facts.brand) out.push('Brand: ' + facts.brand);
-      if (facts.modelName) out.push('Model/family: ' + facts.modelName);
-      if (facts.modelCodes.length) out.push('Model code: ' + facts.modelCodes.join('/'));
-      if (facts.cpu) out.push('CPU: ' + facts.cpu);
-      if (facts.speedGHz) out.push('CPU speed: ' + facts.speedGHz + 'GHz');
-      if (facts.ramGB) out.push('RAM: ' + facts.ramGB + 'GB');
-      if (facts.storageGB) out.push('Storage: ' + formatGB(facts.storageGB));
-      if (facts.screen) out.push('Screen: ' + facts.screen + 'in (optional)');
-      if (facts.network) out.push('Network: ' + facts.network + ' (optional unless contradicted)');
-      if (facts.color) out.push('Color: ' + facts.color + ' (optional)');
-      return out.length ? out : ['No strong expected facts detected'];
+    function formatStorage(gb) {
+      if (!gb) return '';
+      if (gb >= 1024 && gb % 1024 === 0) return `${gb / 1024}TB`;
+      return `${gb}GB`;
     }
 
     function renderSummary(stats) {
-      summaryPills.innerHTML = `
-        <span class="pill bad">True mismatches: ${stats.mismatch.toLocaleString()}</span>
-        <span class="pill warn">Warnings only: ${stats.warning.toLocaleString()}</span>
-        <span class="pill good">Passed: ${stats.pass.toLocaleString()}</span>
-        <span class="pill info">Average score: ${stats.averageScore}%</span>
-        <span class="pill muted-pill">Displayed: ${stats.displayed.toLocaleString()}</span>
-      `;
-      const commentRate = pct(stats.withComments, stats.totalRows);
-      const mismatchRate = pct(stats.mismatch, stats.totalRows);
-      const warningRate = pct(stats.warning, stats.totalRows);
-      summaryNarrative.textContent = `Scanned ${stats.totalRows.toLocaleString()} row(s). ${commentRate}% had inventory comments available for comparison. ${mismatchRate}% contained at least one clear contradiction or missing comment, while ${warningRate}% had no direct contradiction but were missing required descriptive facts such as model, CPU, RAM, or storage. The average row score was ${stats.averageScore}%, calculated from the comparable non-optional facts detected for each row.`;
-      statsBox.innerHTML = [
-        statBlock('Rows scanned', stats.totalRows, 'Rows selected after any focus-list filtering.'),
-        statBlock('True mismatches', stats.mismatch, 'Rows with a contradiction or no inventory comment.'),
-        statBlock('Warnings only', stats.warning, 'Rows missing required facts but not clearly contradictory.'),
-        statBlock('Passed', stats.pass, 'Rows where comparable required facts were confirmed.'),
-        statBlock('With comments', stats.withComments, `${commentRate}% of scanned rows.`),
-        statBlock('Missing comments', stats.missingComment, 'Rows that cannot be validated from comments.'),
-        statBlock('Testing done', stats.testingDone, 'Rows whose comment includes testing-done wording.'),
-        statBlock('QC done', stats.qcDone, 'Rows whose comment includes QC-done wording.')
+      summaryBox.innerHTML = [
+        statCard('Scanned', stats.scanned),
+        statCard('Mismatches', stats.mismatch),
+        statCard('Warnings', stats.warning),
+        statCard('Passed', stats.pass),
+        statCard('Displayed', stats.displayed)
       ].join('');
-    }
-
-    function renderVerboseAnalysis(stats, rows) {
-      dataProfile.innerHTML = renderProfile(stats);
-      qualitySignals.innerHTML = renderQuality(stats);
-      reasonBreakdown.innerHTML = renderMapTable(stats.reasonCounts, 'Reason', 'Rows', stats.totalRows);
-      coverageBreakdown.innerHTML = renderCoverage(stats.checkStats);
-      opsBreakdown.innerHTML = renderOps(stats);
-      repeatBreakdown.innerHTML = renderMapTable(topMap(stats.itemNumberCounts, 12), 'Item number', 'Rows', stats.totalRows);
-    }
-
-    function renderProfile(stats) {
-      const rows = [
-        ['Rows scanned', stats.totalRows], ['Unique item numbers', stats.uniqueItemNumbers], ['Unique serial numbers', stats.uniqueSerials],
-        ['Rows with manufacturer', stats.withMfgr], ['Rows with description', stats.withDescription], ['Rows with unit cost', stats.withUnitCost],
-        ['Average unit cost', stats.averageUnitCost !== null ? '$' + stats.averageUnitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A'],
-        ['Lowest unit cost', stats.minUnitCost !== null ? '$' + stats.minUnitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A'],
-        ['Highest unit cost', stats.maxUnitCost !== null ? '$' + stats.maxUnitCost.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : 'N/A']
-      ];
-      return simpleTable(rows, ['Metric', 'Value']);
-    }
-
-    function renderQuality(stats) {
-      const rows = [
-        ['Inventory comments present', `${stats.withComments.toLocaleString()} (${pct(stats.withComments, stats.totalRows)}%)`],
-        ['Testing done wording', `${stats.testingDone.toLocaleString()} (${pct(stats.testingDone, stats.totalRows)}%)`],
-        ['QC done wording', `${stats.qcDone.toLocaleString()} (${pct(stats.qcDone, stats.totalRows)}%)`],
-        ['Battery percentage captured', `${stats.batteryCaptured.toLocaleString()} (${pct(stats.batteryCaptured, stats.totalRows)}%)`],
-        ['Vendor specs/notes wording', `${stats.vendorSpecs.toLocaleString()} (${pct(stats.vendorSpecs, stats.totalRows)}%)`],
-        ['Rows with defect keywords', `${stats.defectRows.toLocaleString()} (${pct(stats.defectRows, stats.totalRows)}%)`]
-      ];
-      return simpleTable(rows, ['Signal', 'Result']) + '<h3 style="margin-top:18px;">Top defect words</h3>' + renderMapTable(topMap(stats.defectCounts, 12), 'Word', 'Rows', stats.totalRows);
-    }
-
-    function renderCoverage(checkStats) {
-      const entries = Object.entries(checkStats).map(([name, s]) => [name, s.ok || 0, s.missing || 0, s.conflict || 0, s.skip || 0]);
-      if (!entries.length) return '<p class="small">No check statistics available.</p>';
-      return `<div class="mini-table-wrap"><table><thead><tr><th>Check</th><th>Confirmed</th><th>Missing</th><th>Conflicts</th><th>Not detected</th><th>Confirmation rate</th></tr></thead><tbody>${entries.map(([name, ok, missing, conflict, skip]) => {
-        const denom = ok + missing + conflict;
-        const rate = denom ? Math.round(ok / denom * 100) : 0;
-        return `<tr><td>${escapeHtml(name)}</td><td>${ok.toLocaleString()}</td><td>${missing.toLocaleString()}</td><td>${conflict.toLocaleString()}</td><td>${skip.toLocaleString()}</td><td><div class="bar" title="${rate}%"><span style="width:${rate}%"></span></div><span class="small">${rate}%</span></td></tr>`;
-      }).join('')}</tbody></table></div>`;
-    }
-
-    function renderOps(stats) {
-      return '<h3>Warehouse</h3>' + renderMapTable(topMap(stats.warehouseCounts, 10), 'Warehouse', 'Rows', stats.totalRows)
-        + '<h3 style="margin-top:18px;">Condition code</h3>' + renderMapTable(topMap(stats.conditionCounts, 10), 'Condition', 'Rows', stats.totalRows)
-        + '<h3 style="margin-top:18px;">Status</h3>' + renderMapTable(topMap(stats.statusCounts, 10), 'Status', 'Rows', stats.totalRows);
     }
 
     function renderResults(rows) {
       if (!rows.length) {
-        resultsBody.innerHTML = '<tr><td colspan="7">No rows match the selected review mode.</td></tr>';
+        resultsBody.innerHTML = '<tr><td colspan="6" class="muted">No rows match the selected view.</td></tr>';
         return;
       }
       resultsBody.innerHTML = rows.map(row => `
         <tr>
-          <td><b>${escapeHtml(row.itemnumber)}</b><div class="small">Item ID: ${escapeHtml(row.itemid)}<br>Serial: ${escapeHtml(row.serialnumber || 'N/A')}</div></td>
-          <td class="small">Mfr: ${escapeHtml(row.mfgr || 'N/A')}<br>Status: ${escapeHtml(row.status || 'N/A')}<br>Cond: ${escapeHtml(row.conditioncode || 'N/A')}<br>Wh/Loc: ${escapeHtml(row.warehouse || 'N/A')} / ${escapeHtml(row.location || 'N/A')}<br>Unit cost: ${escapeHtml(row.unitcost || 'N/A')}</td>
-          <td><span class="pill ${row.severity === 'Mismatch' ? 'bad' : row.severity === 'Warning' ? 'warn' : 'good'}">${escapeHtml(row.severity)}</span></td>
-          <td class="nowrap"><b>${row.score}%</b></td>
-          <td>${escapeHtml(row.reasons.join(' | ') || 'No issues found')}</td>
-          <td class="row-details">
-            <b>Description:</b> ${escapeHtml(row.description || 'N/A')}<br>
-            <b>Expected:</b> ${escapeHtml(row.expectedFacts.join(' | '))}<br>
-            <b>Analysis:</b> ${escapeHtml(row.narrative)}
-            <div class="checks">${row.checks.map(c => `<span class="pill ${checkClass(c.status)}" title="${escapeHtml(c.note)}">${escapeHtml(c.name)}: ${escapeHtml(c.status)}</span>`).join('')}</div>
-            <details><summary>Show detailed checks</summary>${simpleTable(row.checks.map(c => [c.name, c.expected || 'N/A', c.status, c.optional ? 'Optional' : 'Required', c.note]), ['Check','Expected','Status','Type','Note'])}</details>
-          </td>
-          <td>${escapeHtml(row.inventorycomments.slice(0, 360))}</td>
+          <td class="mono">${escapeHtml(row.itemid)}</td>
+          <td class="mono">${escapeHtml(row.sku)}</td>
+          <td>${severityPill(row.severity, row.score)}</td>
+          <td class="issue">${escapeHtml(row.issues.join(' | '))}</td>
+          <td class="facts">${renderFactLines(row.factLines)}</td>
+          <td class="source-text">${escapeHtml(row.sourceText)}</td>
         </tr>
       `).join('');
     }
 
-    function createStats(totalRows) {
+    function renderFactLines(lines) {
+      if (!lines.length) return '<span class="muted">No SKU facts decoded.</span>';
+      return lines.map(f => {
+        const cls = f.status === 'ok' ? 'ok' : f.status === 'conflict' ? 'badtext' : f.status === 'optional' ? 'muted' : 'warntext';
+        return `<div class="fact-line"><b>${escapeHtml(f.label)}:</b> ${escapeHtml(f.expected)} <span class="${cls}">${escapeHtml(f.mark)}</span></div>`;
+      }).join('');
+    }
+
+    function severityPill(severity, score) {
+      const cls = severity === 'Mismatch' ? 'bad' : severity === 'Warning' ? 'warn' : 'good';
+      return `<span class="pill ${cls}">${escapeHtml(severity)} · ${Number(score).toLocaleString()}%</span>`;
+    }
+
+    function statCard(label, value) {
+      return `<div class="stat"><div class="stat-label">${escapeHtml(label)}</div><div class="stat-value">${Number(value).toLocaleString()}</div></div>`;
+    }
+
+    function buildColumnMap(headers) {
+      const idx = (...names) => {
+        for (const name of names) {
+          const i = headers.indexOf(normalizeHeader(name));
+          if (i >= 0) return i;
+        }
+        return -1;
+      };
       return {
-        totalRows, pass: 0, mismatch: 0, warning: 0, missingComment: 0, displayed: 0, withComments: 0,
-        withMfgr: 0, withDescription: 0, withUnitCost: 0, unitCostSum: 0, unitCostCount: 0, minUnitCost: null, maxUnitCost: null, averageUnitCost: null,
-        testingDone: 0, qcDone: 0, batteryCaptured: 0, vendorSpecs: 0, defectRows: 0, averageScore: 0, scoreSum: 0,
-        itemNumberSet: new Set(), serialSet: new Set(), reasonCounts: {}, defectCounts: {}, warehouseCounts: {}, conditionCounts: {}, statusCounts: {}, itemNumberCounts: {}, checkStats: {}
+        itemid: idx('itemid', 'inventoryid'),
+        itemnumber: idx('itemnumber', 'sku', 'itemsku', 'partnumber'),
+        mfgr: idx('mfgr', 'manufacturer', 'brand'),
+        title: idx('title', 'name', 'itemtitle', 'producttitle'),
+        description: idx('description', 'desc', 'itemdescription'),
+        extdescription: idx('extdescription', 'extendeddescription', 'longdescription'),
+        category: idx('category', 'category1'),
+        inventorycomments: idx('inventorycomments', 'comments')
       };
     }
 
-    function updateStats(stats, result, item) {
-      if (result.severity === 'Mismatch') stats.mismatch += 1;
-      else if (result.severity === 'Warning') stats.warning += 1;
-      else stats.pass += 1;
-      stats.scoreSum += result.score;
-      stats.averageScore = Math.round(stats.scoreSum / (stats.pass + stats.warning + stats.mismatch));
-      if (result.reasons.includes('Missing inventory comments')) stats.missingComment += 1;
-      if (item.inventorycomments.trim()) stats.withComments += 1;
-      if (item.mfgr.trim()) stats.withMfgr += 1;
-      if (item.description.trim()) stats.withDescription += 1;
-      const cost = Number(String(item.unitcost).replace(/[^0-9.-]/g, ''));
-      if (Number.isFinite(cost) && cost > 0) {
-        stats.withUnitCost += 1; stats.unitCostSum += cost; stats.unitCostCount += 1;
-        stats.minUnitCost = stats.minUnitCost === null ? cost : Math.min(stats.minUnitCost, cost);
-        stats.maxUnitCost = stats.maxUnitCost === null ? cost : Math.max(stats.maxUnitCost, cost);
-        stats.averageUnitCost = stats.unitCostSum / stats.unitCostCount;
+    async function readTextSmart(file) {
+      const buffer = await file.arrayBuffer();
+      try {
+        return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+      } catch (e) {
+        return new TextDecoder('windows-1252').decode(buffer);
       }
-      if (item.itemnumber.trim()) { stats.itemNumberSet.add(normalizeText(item.itemnumber)); countMap(stats.itemNumberCounts, item.itemnumber.trim()); }
-      if (item.serialnumber.trim()) stats.serialSet.add(normalizeText(item.serialnumber));
-      stats.uniqueItemNumbers = stats.itemNumberSet.size;
-      stats.uniqueSerials = stats.serialSet.size;
-      countMap(stats.warehouseCounts, item.warehouse.trim() || '(blank)');
-      countMap(stats.conditionCounts, item.conditioncode.trim() || '(blank)');
-      countMap(stats.statusCounts, item.status.trim() || '(blank)');
-      result.reasons.forEach(r => countMap(stats.reasonCounts, shortenReason(r)));
-      if (result.signals.hasTestingDone) stats.testingDone += 1;
-      if (result.signals.hasQCDone) stats.qcDone += 1;
-      if (result.signals.batteryPercent !== null) stats.batteryCaptured += 1;
-      if (result.signals.hasVendorSpecs) stats.vendorSpecs += 1;
-      if (result.signals.defects.length) stats.defectRows += 1;
-      result.signals.defects.forEach(d => countMap(stats.defectCounts, d));
-      result.checks.forEach(c => {
-        if (!stats.checkStats[c.name]) stats.checkStats[c.name] = { ok: 0, missing: 0, conflict: 0, skip: 0 };
-        stats.checkStats[c.name][c.status] += 1;
-      });
     }
 
-    function shortenReason(reason) {
-      return String(reason).replace(/: .*/, '').slice(0, 90);
-    }
-
-    function countMap(map, key) { map[key] = (map[key] || 0) + 1; }
-    function topMap(map, limit) { return Object.fromEntries(Object.entries(map).sort((a, b) => b[1] - a[1] || String(a[0]).localeCompare(String(b[0]))).slice(0, limit)); }
-
-    function renderMapTable(map, keyLabel, valueLabel, total) {
-      const entries = Object.entries(map || {});
-      if (!entries.length) return '<p class="small">No entries to show.</p>';
-      return `<div class="mini-table-wrap"><table><thead><tr><th>${escapeHtml(keyLabel)}</th><th>${escapeHtml(valueLabel)}</th><th>Share</th></tr></thead><tbody>${entries.map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${Number(v).toLocaleString()}</td><td>${pct(v, total)}%</td></tr>`).join('')}</tbody></table></div>`;
-    }
-
-    function simpleTable(rows, headers) {
-      return `<div class="mini-table-wrap"><table><thead><tr>${headers.map(h => `<th>${escapeHtml(h)}</th>`).join('')}</tr></thead><tbody>${rows.map(r => `<tr>${r.map(c => `<td>${escapeHtml(c)}</td>`).join('')}</tr>`).join('')}</tbody></table></div>`;
-    }
-
-    function statBlock(label, value, note) {
-      return `<div class="stat"><div class="label">${escapeHtml(label)}</div><div class="num">${typeof value === 'number' ? value.toLocaleString() : escapeHtml(value)}</div><div class="note">${escapeHtml(note || '')}</div></div>`;
-    }
-
-    function checkClass(status) {
-      if (status === 'ok') return 'check-ok';
-      if (status === 'conflict') return 'check-conflict';
-      if (status === 'missing') return 'check-missing';
-      return 'check-skip';
-    }
-
-    function setProgress(percent, text) {
-      progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
-      statusText.textContent = text;
-    }
-
-    function pause() { return new Promise(resolve => setTimeout(resolve, 0)); }
-    function pct(part, whole) { return whole ? Math.round((Number(part) / Number(whole)) * 100) : 0; }
-    function nearlyEqual(a, b) { return Math.abs(Number(a) - Number(b)) < 0.06; }
-    function formatGB(gb) { return Number(gb) >= 1024 && Number(gb) % 1024 === 0 ? (Number(gb) / 1024) + 'TB' : Number(gb) + 'GB'; }
-    function normalizeHeader(value) { return String(value || '').trim().toLowerCase().replace(/[^a-z0-9]/g, ''); }
-    function normalizeText(value) { return String(value || '').toUpperCase().replace(/\u00a0/g, ' ').replace(/[‐‑‒–—]/g, '-').replace(/[“”]/g, '"').replace(/['’]/g, '').replace(/\s+/g, ' ').trim(); }
-    function safeCell(value) { return String(value == null ? '' : value).trim(); }
-    function unique(values) { return [...new Set(values.filter(v => v !== null && v !== undefined && v !== ''))]; }
-    function escapeRegExp(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
-    function tokenFound(text, token) {
-      const t = normalizeText(text);
-      const tok = normalizeText(token);
-      if (!tok) return false;
-      if (/^A\d{4}$/.test(tok)) return new RegExp('\\bA\\s*' + tok.slice(1) + '\\b').test(t);
-      return new RegExp('(^|[^A-Z0-9])' + escapeRegExp(tok).replace(/\\ /g, '\\s*') + '([^A-Z0-9]|$)').test(t);
-    }
-    function csvEscape(value) {
-      const text = String(value ?? '');
-      if (/[",\n]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
-      return text;
-    }
-    function escapeHtml(value) {
-      return String(value ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
-    }
-
-    function detectDelimiter(text) {
-      const candidates = [',', ';', '\t', '|'];
-      const sample = text.slice(0, 50000);
-      let best = ',', bestScore = -1;
-      for (const delimiter of candidates) {
-        const parsed = parseCSVWithDelimiter(sample, delimiter);
-        const counts = parsed.slice(0, 25).map(r => r.length).filter(n => n > 1);
-        const score = counts.length ? mostCommon(counts).count : 0;
-        if (score > bestScore) { bestScore = score; best = delimiter; }
-      }
-      return best;
-    }
-    function mostCommon(values) {
-      const map = new Map();
-      for (const v of values) map.set(v, (map.get(v) || 0) + 1);
-      let bestValue = null, bestCount = -1;
-      for (const [k, v] of map.entries()) if (v > bestCount) { bestValue = k; bestCount = v; }
-      return { value: bestValue, count: bestCount };
-    }
     function parseCSV(text) {
       let normalized = String(text || '').replace(/^\uFEFF/, '');
       const sepMatch = normalized.match(/^sep=(.)\r?\n/i);
       let delimiter = sepMatch ? sepMatch[1] : detectDelimiter(normalized);
       if (sepMatch) normalized = normalized.replace(/^sep=(.)\r?\n/i, '');
-      return parseCSVWithDelimiter(normalized, delimiter).filter(r => r.some(cell => String(cell || '').trim() !== ''));
+      return parseCSVWithDelimiter(normalized, delimiter).filter(r => r.some(cell => safeCell(cell)));
     }
+
+    function detectDelimiter(text) {
+      const candidates = [',', ';', '\t', '|'];
+      let best = ',', bestScore = -1;
+      for (const d of candidates) {
+        const parsed = parseCSVWithDelimiter(text.slice(0, 40000), d);
+        const counts = parsed.slice(0, 20).map(r => r.length).filter(n => n > 1);
+        const score = counts.length ? Math.max(...counts.map(n => counts.filter(x => x === n).length)) : 0;
+        if (score > bestScore) { best = d; bestScore = score; }
+      }
+      return best;
+    }
+
     function parseCSVWithDelimiter(text, delimiter) {
       const rows = [];
       let row = [], field = '', i = 0, inQuotes = false;
       while (i < text.length) {
-        const char = text[i], next = text[i + 1];
+        const ch = text[i], next = text[i + 1];
         if (inQuotes) {
-          if (char === '"' && next === '"') { field += '"'; i += 2; continue; }
-          if (char === '"') { inQuotes = false; i += 1; continue; }
-          field += char; i += 1; continue;
+          if (ch === '"' && next === '"') { field += '"'; i += 2; continue; }
+          if (ch === '"') { inQuotes = false; i++; continue; }
+          field += ch; i++; continue;
         }
-        if (char === '"') { inQuotes = true; i += 1; continue; }
-        if (char === delimiter) { row.push(field); field = ''; i += 1; continue; }
-        if (char === '\r' && next === '\n') { row.push(field); rows.push(row); row = []; field = ''; i += 2; continue; }
-        if (char === '\n' || char === '\r') { row.push(field); rows.push(row); row = []; field = ''; i += 1; continue; }
-        field += char; i += 1;
+        if (ch === '"') { inQuotes = true; i++; continue; }
+        if (ch === delimiter) { row.push(field); field = ''; i++; continue; }
+        if (ch === '\r' && next === '\n') { row.push(field); rows.push(row); row = []; field = ''; i += 2; continue; }
+        if (ch === '\n' || ch === '\r') { row.push(field); rows.push(row); row = []; field = ''; i++; continue; }
+        field += ch; i++;
       }
       if (field.length || row.length) { row.push(field); rows.push(row); }
       return rows;
+    }
+
+    function getCell(row, index) { return index >= 0 ? safeCell(row[index]) : ''; }
+    function safeCell(value) { return String(value == null ? '' : value).trim(); }
+    function normalizeHeader(value) { return safeCell(value).toLowerCase().replace(/[^a-z0-9]/g, ''); }
+    function normalizeText(value) {
+      return safeCell(value)
+        .toUpperCase()
+        .replace(/\u00a0/g, ' ')
+        .replace(/[‐‑‒–—]/g, '-')
+        .replace(/[“”]/g, '"')
+        .replace(/[Ó]/g, '"')
+        .replace(/\s+/g, ' ')
+        .trim();
+    }
+    function unique(values) { return [...new Set(values)]; }
+    function pause() { return new Promise(resolve => setTimeout(resolve, 0)); }
+    function setProgress(percent, text) {
+      progressBar.style.width = Math.max(0, Math.min(100, percent)) + '%';
+      statusText.textContent = text;
+    }
+    function escapeRegExp(value) { return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&'); }
+    function escapeHtml(value) {
+      return safeCell(value).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    }
+    function csvEscape(value) {
+      const text = safeCell(value);
+      if (/[",\n\r]/.test(text)) return '"' + text.replace(/"/g, '""') + '"';
+      return text;
+    }
+    function titleCase(value) {
+      return safeCell(value).toLowerCase().replace(/\b\w/g, c => c.toUpperCase()).replace(/\bFhd\b/g, 'FHD').replace(/\bUhd\b/g, 'UHD');
     }
   </script>
 </body>
