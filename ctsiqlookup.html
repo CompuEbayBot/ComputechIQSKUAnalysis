@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>CTS SKU Description Checker v5</title>
+  <title>CTS SKU vs Inventory Comments Checker v6</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop stop-color='%232563eb'/%3E%3Cstop offset='1' stop-color='%230f766e'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='64' height='64' rx='14' fill='url(%23g)'/%3E%3Ccircle cx='21' cy='32' r='12' fill='none' stroke='white' stroke-width='3'/%3E%3Cpath d='M9 32h24M21 20c5 6 5 18 0 24M21 20c-5 6-5 18 0 24M12 25c6 3 12 3 18 0M12 39c6-3 12-3 18 0' stroke='white' stroke-width='1.8' fill='none'/%3E%3Ctext x='36' y='39' font-family='Arial,sans-serif' font-size='15' font-weight='800' fill='white'%3ECTS%3C/text%3E%3C/svg%3E" />
   <style>
     :root {
@@ -154,9 +154,9 @@
     <header class="hero">
       <div class="logo">CTS</div>
       <div>
-        <h1>Fuzzy SKU vs Title / Description Checker</h1>
-        <p>CSV only. Compares the coded SKU facts against the title/description and shows only actual inconsistencies by default.</p>
-        <span class="version">v5.1 - model-code matching fixed</span>
+        <h1>Fuzzy SKU vs Inventory Comments Checker</h1>
+        <p>CSV only. Compares coded SKU facts from itemnumber against inventorycomments and shows only actual inconsistencies by default.</p>
+        <span class="version">v6.0 - itemnumber vs inventorycomments</span>
       </div>
     </header>
 
@@ -165,7 +165,7 @@
         <div>
           <label for="csvFile">Upload CSV</label>
           <input id="csvFile" type="file" accept=".csv,text/csv,.txt" />
-          <div class="help">Looks for <b>itemnumber</b> and <b>description</b>. Optional: itemid, mfgr, category, inventorycomments, extdescription.</div>
+          <div class="help">Looks for required headers <b>itemnumber</b> and <b>inventorycomments</b>. Optional: itemid, mfgr, category, description.</div>
         </div>
         <div>
           <label for="mode">Rows to show</label>
@@ -174,7 +174,7 @@
             <option value="issues">Mismatches and warnings</option>
             <option value="all">All rows</option>
           </select>
-          <div class="help">Default view hides missing optional details and shows contradictions only.</div>
+          <div class="help">Default view hides optional details and shows contradictions only.</div>
         </div>
         <div>
           <label for="filterItems">Optional item filter</label>
@@ -203,7 +203,7 @@
               <th>Severity</th>
               <th>Issue</th>
               <th>SKU Facts Checked</th>
-              <th>Title / Description</th>
+              <th>Inventory Comments</th>
             </tr>
           </thead>
           <tbody id="resultsBody"></tbody>
@@ -254,9 +254,7 @@
         const headers = rows[0].map(normalizeHeader);
         const col = buildColumnMap(headers);
         if (col.itemnumber < 0) throw new Error('Missing required column: itemnumber.');
-        if (col.description < 0 && col.title < 0 && col.extdescription < 0) {
-          throw new Error('Missing a title/description column. Expected description, title, name, or extdescription.');
-        }
+        if (col.inventorycomments < 0) throw new Error('Missing required column: inventorycomments.');
 
         const filterSet = new Set(filterItems.value.split(/\r?\n/).map(v => normalizeText(v)).filter(Boolean));
         const dataRows = rows.slice(1).filter(r => r.some(cell => safeCell(cell)));
@@ -315,7 +313,7 @@
 
     downloadBtn.addEventListener('click', () => {
       if (!displayedRows.length) return;
-      const headers = ['itemid', 'itemnumber', 'severity', 'issue', 'sku_facts_checked', 'title_description'];
+      const headers = ['itemid', 'itemnumber', 'severity', 'issue', 'sku_facts_checked', 'inventorycomments'];
       const lines = [headers.join(',')];
       for (const row of displayedRows) {
         lines.push([
@@ -367,7 +365,7 @@
       }
       if (!safeCell(sourceText)) {
         conflicts++;
-        issues.push('Missing title/description text to compare against SKU.');
+        issues.push('Missing inventorycomments text to compare against SKU.');
       }
 
       addCheck('Product/model', skuFacts.modelDisplay, () => checkModel(normalizedSource, skuFacts));
@@ -517,12 +515,12 @@
     }
 
     function buildSourceText(item) {
-      return [item.title, item.description, item.extdescription].map(safeCell).filter(Boolean).join(' | ');
+      return safeCell(item.inventorycomments);
     }
 
     function checkModel(text, facts) {
       if (!facts.modelDisplay) return { status: 'optional' };
-      if (!text) return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; title/description is blank.` };
+      if (!text) return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; inventorycomments is blank.` };
 
       // Fuzzy lookup: the compact SKU prefix does not need to appear literally.
       // Example matches accepted by this function:
@@ -546,7 +544,7 @@
 
       const found = extractLikelyModel(text);
       if (found && fuzzy.score < 0.45) {
-        return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; title/description appears to say ${found}.` };
+        return { status: 'conflict', message: `Model mismatch: SKU says ${facts.modelDisplay}; inventorycomments appears to say ${found}.` };
       }
       return { status: 'missing', message: `Model not confidently matched: SKU says ${facts.modelDisplay}; closest fuzzy match was ${Math.round(fuzzy.score * 100)}%.` };
     }
@@ -647,52 +645,52 @@
     }
 
     function checkCpuClass(text, cpuClass) {
-      if (!text) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; title/description is blank.` };
+      if (!text) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; inventorycomments is blank.` };
       const cls = normalizeText(cpuClass).replace(/\s+/g, '').toLowerCase();
       const found = extractCpuClasses(text);
       if (found.includes(cls)) return { status: 'ok' };
-      if (found.length) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; title/description says ${found.join(', ')}.` };
-      return { status: 'missing', message: `CPU missing from title/description: SKU says ${cpuClass}.` };
+      if (found.length) return { status: 'conflict', message: `CPU mismatch: SKU says ${cpuClass}; inventorycomments says ${found.join(', ')}.` };
+      return { status: 'missing', message: `CPU missing from inventorycomments: SKU says ${cpuClass}.` };
     }
 
     function checkSpeed(text, speed) {
-      if (!text) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; title/description is blank.` };
+      if (!text) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; inventorycomments is blank.` };
       const speeds = extractSpeeds(text);
       if (speeds.some(v => Math.abs(v - speed) < 0.06)) return { status: 'ok' };
-      if (speeds.length) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; title/description says ${speeds.map(v => v + 'GHz').join(', ')}.` };
-      return { status: 'missing', message: `CPU speed missing from title/description: SKU says ${speed}GHz.` };
+      if (speeds.length) return { status: 'conflict', message: `CPU speed mismatch: SKU says ${speed}GHz; inventorycomments says ${speeds.map(v => v + 'GHz').join(', ')}.` };
+      return { status: 'missing', message: `CPU speed missing from inventorycomments: SKU says ${speed}GHz.` };
     }
 
     function checkNumberWithUnit(text, value, unit, label) {
-      if (!text) return { status: 'conflict', message: `${label} mismatch: SKU says ${value}${unit}; title/description is blank.` };
+      if (!text) return { status: 'conflict', message: `${label} mismatch: SKU says ${value}${unit}; inventorycomments is blank.` };
       const values = extractGBValues(text);
       if (values.includes(value)) return { status: 'ok' };
       // If checking RAM, avoid treating storage-only GB values as a hard mismatch when there is no obvious RAM field.
       if (label === 'RAM') {
         const ramValues = extractRamValues(text);
         if (ramValues.includes(value)) return { status: 'ok' };
-        if (ramValues.length) return { status: 'conflict', message: `RAM mismatch: SKU says ${value}GB; title/description says ${ramValues.join(', ')}GB.` };
+        if (ramValues.length) return { status: 'conflict', message: `RAM mismatch: SKU says ${value}GB; inventorycomments says ${ramValues.join(', ')}GB.` };
       }
-      return { status: 'missing', message: `${label} missing from title/description: SKU says ${value}${unit}.` };
+      return { status: 'missing', message: `${label} missing from inventorycomments: SKU says ${value}${unit}.` };
     }
 
     function checkStorage(text, storageGB) {
-      if (!text) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; title/description is blank.` };
+      if (!text) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; inventorycomments is blank.` };
       const values = extractStorageValues(text);
       if (values.includes(storageGB)) return { status: 'ok' };
-      if (values.length) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; title/description says ${values.map(formatStorage).join(', ')}.` };
-      return { status: 'missing', message: `Storage missing from title/description: SKU says ${formatStorage(storageGB)}.` };
+      if (values.length) return { status: 'conflict', message: `Storage mismatch: SKU says ${formatStorage(storageGB)}; inventorycomments says ${values.map(formatStorage).join(', ')}.` };
+      return { status: 'missing', message: `Storage missing from inventorycomments: SKU says ${formatStorage(storageGB)}.` };
     }
 
     function checkColor(text, color) {
-      if (!text) return { status: 'missing', message: `Color missing from title/description: SKU says ${color}.` };
+      if (!text) return { status: 'missing', message: `Color missing from inventorycomments: SKU says ${color}.` };
       const expected = normalizeText(color);
       if (expected === 'GRAY' && /\b(GY|GRAY|GREY)\b/.test(text)) return { status: 'ok' };
       if (expected === 'SPACE GRAY' && /\b(SG|SPACE GRAY|SPACE GREY)\b/.test(text)) return { status: 'ok' };
       if (expected === 'SILVER' && /\b(SV|SILVER)\b/.test(text)) return { status: 'ok' };
       if (expected === 'BLACK' && /\b(BL|BLACK)\b/.test(text)) return { status: 'ok' };
       const other = extractColor(text);
-      if (other) return { status: 'conflict', message: `Color mismatch: SKU says ${color}; title/description says ${other}.` };
+      if (other) return { status: 'conflict', message: `Color mismatch: SKU says ${color}; inventorycomments says ${other}.` };
       return { status: 'optional' };
     }
 
